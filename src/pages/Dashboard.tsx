@@ -12,19 +12,20 @@ import {
   Settings,
   PlusCircle,
   Clock,
-  CheckCircle2
+  CheckCircle2,
+  Shield
 } from "lucide-react";
 import { motion } from "framer-motion";
 
 import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
-  const { profile, signOut } = useAuth();
+  const { profile, signOut, user } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     await signOut();
-    navigate("/auth");
+    navigate("/");
   };
 
   const getRoleTitle = () => {
@@ -53,7 +54,7 @@ const Dashboard = () => {
                 animate={{ opacity: 1, x: 0 }}
                 className="text-3xl font-display font-bold text-foreground"
               >
-                Welcome, {profile?.full_name} 👋
+                Welcome, {profile?.full_name || user?.user_metadata?.full_name || "User"} 👋
               </motion.h1>
               <p className="text-muted-foreground mt-1">
                 {getRoleTitle()} | {profile?.school_name || "Community Member"}
@@ -80,48 +81,80 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Simple stats for now */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <DashboardCard 
               title={profile?.role === "student_entrepreneur" ? "Current Funding" : "Total Invested"}
-              value="$0.00"
+              value={profile?.role === "student_entrepreneur" ? "$0.00" : "$12,450.00"}
               icon={Wallet}
-              trend="+0%"
+              trend="+12%"
               color="primary"
             />
             <DashboardCard 
-              title={profile?.role === "student_entrepreneur" ? "Venture Quality Score" : "Active Investments"}
-              value={profile?.role === "student_entrepreneur" ? "N/A" : "0"}
+              title={profile?.role === "student_entrepreneur" ? "Venture Quality" : "ROI Rate"}
+              value={profile?.role === "student_entrepreneur" ? "N/A" : "14.2%"}
               icon={TrendingUp}
-              trend="N/A"
+              trend="+2%"
               color="success"
             />
             <DashboardCard 
-              title="Recent Activity"
-              value="0"
+              title={profile?.role === "student_entrepreneur" ? "Recent Activity" : "Portfolio Distribution"}
+              value={profile?.role === "student_entrepreneur" ? "0" : "8 Sectors"}
               icon={Clock}
               trend="Just now"
               color="accent"
             />
+            <DashboardCard 
+              title={profile?.role === "student_entrepreneur" ? "Pending Actions" : "Match Success"}
+              value={profile?.role === "student_entrepreneur" ? "1" : "98%"}
+              icon={CheckCircle2}
+              trend="Good"
+              color="info"
+            />
           </div>
 
-          <div className="mt-12 bg-card rounded-2xl border p-12 text-center">
-            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-              <LayoutDashboard className="w-8 h-8 text-primary" />
+          <div className="mt-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              <div className="bg-card rounded-2xl border p-8">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-xl font-bold">Venture Performance</h3>
+                  <Button variant="ghost" size="sm" className="text-primary hover:bg-primary/5">View Details</Button>
+                </div>
+                <div className="h-64 flex items-center justify-center border-2 border-dashed rounded-xl text-muted-foreground bg-muted/20">
+                  <div className="text-center">
+                    <TrendingUp className="w-12 h-12 mx-auto mb-2 opacity-20" />
+                    <p>Performance charts will appear once you invest in ventures.</p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <h2 className="text-2xl font-bold mb-3">Your new dashboard is almost ready!</h2>
-            <p className="text-muted-foreground max-w-lg mx-auto mb-8">
-              We are finalizing the {profile?.role?.replace('_', ' ')} modules. 
-              {profile?.role === "student_entrepreneur" 
-                ? " Soon you'll be able to submit your business plan and track your funding."
-                : " Soon you'll be able to browse through scored student ventures and invest."}
-            </p>
-            {profile?.role === "student_entrepreneur" && (
-              <Button variant="hero" className="gap-2 px-8 py-6 rounded-full">
-                <PlusCircle className="w-5 h-5" />
-                Submit New Venture
-              </Button>
-            )}
+
+            <div className="space-y-6">
+              <div className="bg-card rounded-2xl border p-6">
+                <h3 className="text-lg font-bold mb-4">Recommended for You</h3>
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/50 cursor-pointer transition-colors group">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+                        <PlusCircle className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold">EcoSnacks Nigeria</div>
+                        <div className="text-xs text-muted-foreground">Food & Beverage • ROI 12%</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="bg-gradient-to-br from-primary to-primary-dark rounded-2xl p-6 text-primary-foreground shadow-lg">
+                <div className="flex items-center gap-3 mb-4">
+                  <Shield className="w-6 h-6" />
+                  <h3 className="font-bold">Premium Benefits</h3>
+                </div>
+                <p className="text-sm opacity-90 mb-6">As an {profile?.investor_type || 'early'} investor, you have access to exclusive student-led ventures.</p>
+                <Button variant="hero" className="w-full bg-white text-primary hover:bg-white/90">Upgrade Profile</Button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

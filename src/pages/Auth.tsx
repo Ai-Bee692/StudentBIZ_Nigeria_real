@@ -74,8 +74,8 @@ const Auth = () => {
           description: "Sign in successful.",
         });
         
-        // Timeout to ensure profile is fetched before redirect
-        setTimeout(() => navigate("/dashboard"), 100);
+        // No manual navigate needed here, the useEffect at the top handles it 
+        // as soon as the session is updated in useAuth().
       } else {
         // REGISTRATION LOGIC
         if (formData.password !== formData.confirmPassword) {
@@ -89,6 +89,16 @@ const Auth = () => {
 
         const role = userType === "student" ? "student_entrepreneur" : "investor";
         
+        // Frontend Validation
+        if (formData.password.length < 6) {
+          toast({
+            title: "Password too short",
+            description: "Password must be at least 6 characters long.",
+            variant: "destructive"
+          });
+          return;
+        }
+
         // 1. Sign up user
         const { data: authData, error: signUpError } = await supabase.auth.signUp({
           email: formData.email,
@@ -105,7 +115,12 @@ const Auth = () => {
           }
         });
 
-        if (signUpError) throw signUpError;
+        if (signUpError) {
+          if (signUpError.message.includes("User already registered")) {
+            throw new Error("This email is already taken. Please sign in instead.");
+          }
+          throw signUpError;
+        }
         if (!authData.user) throw new Error("Registration failed");
 
         // 2. Create profile
@@ -141,7 +156,7 @@ const Auth = () => {
     } catch (error: any) {
       toast({
         title: "Authentication Error",
-        description: error.message || "An unexpected error occurred.",
+        description: error.message || "An unexpected error occurred. Please check your connection and try again.",
         variant: "destructive"
       });
     } finally {

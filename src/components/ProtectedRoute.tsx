@@ -11,7 +11,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
   const { session, profile, loading } = useAuth();
   const location = useLocation();
 
-  if (loading) {
+  if (loading && !session) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -19,7 +19,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
     );
   }
 
-  if (!session) {
+  if (!session && !loading) {
     // Redirect to login but save the current location to redirect back after login
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
