@@ -12,41 +12,41 @@
 
 @layer base {
   :root {
-    --background: 210 25% 98%;
-    --foreground: 215 25% 15%;
+    --background: 217 33% 97%; /* #f3f6fb */
+    --foreground: 0 0% 10%; /* #1a1a1a */
 
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card-foreground: 0 0% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --popover-foreground: 0 0% 10%;
 
-    --primary: 210 100% 45%;
+    --primary: 221 79% 48%; /* #1a56db */
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 210 100% 55%;
+    --primary-glow: 221 79% 58%;
 
-    --secondary: 156 62% 42%;
+    --secondary: 150 65% 29%; /* #1a7a4a */
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 20% 94%;
-    --muted-foreground: 215 15% 50%;
+    --muted: 215 14% 94%; 
+    --muted-foreground: 215 14% 46%; /* #6b7280 */
 
-    --accent: 24 95% 53%;
+    --accent: 38 92% 44%; /* #d97706 */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 20% 90%;
-    --input: 214 20% 90%;
-    --ring: 210 100% 45%;
+    --border: 0 0% 90%; /* rgba(0,0,0,0.1) approx */
+    --input: 0 0% 90%;
+    --ring: 221 79% 48%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem; /* 8px */
 
     /* Custom tokens */
-    --success: 156 62% 42%;
+    --success: 150 65% 29%;
     --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
+    --warning: 38 92% 44%;
     --warning-foreground: 0 0% 100%;
     --info: 199 89% 48%;
     --info-foreground: 0 0% 100%;

@@ -12,6 +12,23 @@ interface Profile {
   investor_type?: InvestorType;
   school_name?: string;
   phone_number?: string;
+  address?: string;
+  state?: string;
+  date_of_birth?: string;
+  national_id_number?: string;
+  kyc_status?: 'pending' | 'under_review' | 'verified' | 'rejected';
+  bvn?: string;
+  bank_name?: string;
+  bank_account_number?: string;
+  student_id_url?: string;
+  business_reg_url?: string;
+  kyc_submitted_at?: string;
+  matric_number?: string;
+  semester_gpa?: number;
+  cgpa?: number;
+  instagram_handle?: string;
+  twitter_handle?: string;
+  facebook_handle?: string;
 }
 
 interface AuthContextType {
@@ -29,76 +46,99 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const fetchingId = React.useRef<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
 
     // Helper to fetch profile once
     const syncProfile = async (userId: string) => {
-      // Don't fetch if we already have this profile in state
-      if (profile?.id === userId) {
-        setLoading(false);
+      // Don't fetch if we already have this profile or it's currently fetching
+      if (profile?.id === userId || fetchingId.current === userId) {
+        if (profile?.id === userId) setLoading(false);
         return;
       }
       await fetchProfile(userId);
     };
 
-    // Listen for auth changes (Supabase handles INITIAL_SESSION automatically here too)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (!mounted) return;
+    // Main initialization: Use getSession() to start, and ONLY then set up the listener
+    const initAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!mounted) return;
 
-      console.log("Auth Event:", event, session?.user?.id);
-      
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        await syncProfile(session.user.id);
-      } else {
-        setProfile(null);
+        if (session) {
+          setSession(session);
+          setUser(session.user);
+          await syncProfile(session.user.id);
+        } else {
+          setLoading(false);
+        }
+
+        // Subscribe to auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+          if (!mounted) return;
+          
+          setSession(session);
+          setUser(session?.user ?? null);
+          
+          if (session?.user) {
+            await syncProfile(session.user.id);
+          } else {
+            setProfile(null);
+            setLoading(false);
+          }
+        });
+
+        return () => subscription.unsubscribe();
+      } catch (err) {
+        console.error("Auth initialization error:", err);
         setLoading(false);
       }
-    });
+    };
 
-    // Fallback: If for some reason the listener didn't pick up the session immediately
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      if (session && !user) {
-        setSession(session);
-        setUser(session.user);
-        syncProfile(session.user.id);
-      } else if (!session) {
-        setLoading(false);
-      }
-    });
+    const cleanup = initAuth();
 
     return () => {
       mounted = false;
-      subscription.unsubscribe();
+      cleanup.then(unsub => unsub?.());
     };
   }, []);
 
   const fetchProfile = async (userId: string) => {
+    if (fetchingId.current === userId) return;
+    fetchingId.current = userId;
+    
     try {
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", userId)
-        .single();
+        .limit(1);
 
       if (error) {
         // If profile is missing but we have a session, attempt recovery
         if (error.code === "PGRST116" && user) {
-          console.warn("Profile missing. Attempting recovery...");
           await recoverProfile(user);
           return;
         }
         throw error;
       };
-      setProfile(data as Profile);
-    } catch (error) {
-      console.error("Error fetching profile:", error);
+      
+      const profileData = data && data.length > 0 ? data[0] : null;
+
+      if (!profileData && user) {
+        await recoverProfile(user);
+        return;
+      }
+
+      if (profileData) {
+        setProfile(profileData as Profile);
+      }
+    } catch (error: any) {
+      console.error("Error fetching profile:", error.message || error);
     } finally {
+      fetchingId.current = null;
       setLoading(false);
     }
   };
@@ -110,7 +150,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .upsert({
           id: authUser.id,
           full_name: authUser.user_metadata?.full_name || "New User",
-          role: authUser.user_metadata?.role || "investor",
+          role: authUser.user_metadata?.role || "student_entrepreneur",
           investor_type: authUser.user_metadata?.investor_type,
           school_name: authUser.user_metadata?.school_name,
         })
@@ -119,9 +159,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) throw error;
       setProfile(data as Profile);
-      console.log("Profile recovered successfully");
-    } catch (error) {
-      console.error("Recovery failed:", error);
+    } catch (error: any) {
+      console.error("Profile recovery failed:", error.message || error);
     } finally {
       setLoading(false);
     }

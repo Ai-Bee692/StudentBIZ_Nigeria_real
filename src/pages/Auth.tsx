@@ -67,11 +67,15 @@ const Auth = () => {
           password: formData.password,
         });
 
-        if (error) throw error;
+        if (error) {
+          console.error("Login attempt failed:", error.message);
+          throw error;
+        }
 
+        console.log("Login successful, waiting for session update...");
         toast({
           title: "Welcome back!",
-          description: "Sign in successful.",
+          description: "Sign in successful. Redirecting to your dashboard...",
         });
         
         // No manual navigate needed here, the useEffect at the top handles it 
