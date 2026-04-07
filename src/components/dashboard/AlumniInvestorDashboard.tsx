@@ -83,7 +83,101 @@ const AlumniInvestorDashboard = () => {
     instagramHandle: profile?.instagram_handle || "",
     twitterHandle: profile?.twitter_handle || "",
     facebookHandle: profile?.facebook_handle || "",
+    occupation: profile?.occupation || "",
   });
+
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [editForm, setEditForm] = useState({
+    fullName: profile?.full_name || "",
+    phoneNumber: profile?.phone_number || "",
+    occupation: profile?.occupation || "",
+    bvn: profile?.bvn || "",
+    bankName: profile?.bank_name || "",
+    accountNumber: profile?.bank_account_number || "",
+    address: profile?.address || "",
+    state: profile?.state || "",
+    dateOfBirth: profile?.date_of_birth || "",
+    nationalIdNumber: profile?.national_id_number || "",
+    instagram: profile?.instagram_handle || "",
+    twitter: profile?.twitter_handle || "",
+    facebook: profile?.facebook_handle || ""
+  });
+
+  const startEditing = () => {
+    setEditForm({
+      fullName: profile?.full_name || "",
+      phoneNumber: profile?.phone_number || "",
+      occupation: profile?.occupation || "",
+      bvn: profile?.bvn || "",
+      bankName: profile?.bank_name || "",
+      accountNumber: profile?.bank_account_number || "",
+      address: profile?.address || "",
+      state: profile?.state || "",
+      dateOfBirth: profile?.date_of_birth || "",
+      nationalIdNumber: profile?.national_id_number || "",
+      instagram: profile?.instagram_handle || "",
+      twitter: profile?.twitter_handle || "",
+      facebook: profile?.facebook_handle || ""
+    });
+    setIsEditingProfile(true);
+  };
+
+  const handleProfileUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profile?.id) return;
+
+    setIsSavingProfile(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: editForm.fullName,
+          phone_number: editForm.phoneNumber,
+          occupation: editForm.occupation,
+          bvn: editForm.bvn,
+          bank_name: editForm.bankName,
+          bank_account_number: editForm.accountNumber,
+          address: editForm.address,
+          state: editForm.state,
+          date_of_birth: editForm.dateOfBirth,
+          national_id_number: editForm.nationalIdNumber,
+          instagram_handle: editForm.instagram,
+          twitter_handle: editForm.twitter,
+          facebook_handle: editForm.facebook,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', profile.id);
+
+      if (error) throw error;
+
+      toast({ title: "Profile Updated", description: "Your professional profile has been updated." });
+      
+      // Update local profile object
+      if (profile) {
+        profile.full_name = editForm.fullName;
+        profile.phone_number = editForm.phoneNumber;
+        profile.occupation = editForm.occupation;
+        profile.bvn = editForm.bvn;
+        profile.bank_name = editForm.bankName;
+        profile.bank_account_number = editForm.accountNumber;
+        profile.address = editForm.address;
+        profile.state = editForm.state;
+        profile.date_of_birth = editForm.dateOfBirth;
+        profile.national_id_number = editForm.nationalIdNumber;
+        profile.instagram_handle = editForm.instagram;
+        profile.twitter_handle = editForm.twitter;
+        profile.facebook_handle = editForm.facebook;
+      }
+
+      setIsEditingProfile(false);
+    } catch (err: any) {
+      console.error("Profile update error:", err);
+      toast({ title: "Update Failed", description: err.message, variant: "destructive" });
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
 
   const formatNaira = (amt: number) => {
     return new Intl.NumberFormat('en-NG', {
@@ -154,6 +248,7 @@ const AlumniInvestorDashboard = () => {
         instagram_handle: kycForm.instagramHandle || profile?.instagram_handle,
         twitter_handle: kycForm.twitterHandle || profile?.twitter_handle,
         facebook_handle: kycForm.facebookHandle || profile?.facebook_handle,
+        occupation: kycForm.occupation || profile?.occupation,
         student_id_url: idUrl,
         kyc_status: 'under_review',
         kyc_submitted_at: new Date().toISOString(),
@@ -240,7 +335,7 @@ const AlumniInvestorDashboard = () => {
               { id: "notifications", label: "Notifications" },
               { id: "profile", label: "Profile" }
             ].map((tab) => (
-              <button
+              <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as AlumniTab)}
                 className={`py-5 text-[13px] font-extrabold uppercase tracking-wide whitespace-nowrap transition-all relative ${
@@ -290,7 +385,18 @@ const AlumniInvestorDashboard = () => {
                   />
                 )}
                 {activeTab === "notifications" && <AlumniNotifications />}
-                {activeTab === "profile" && <AlumniProfile profile={profile} />}
+                {activeTab === "profile" && (
+                  <AlumniProfile 
+                    profile={profile} 
+                    isEditing={isEditingProfile}
+                    setIsEditing={setIsEditingProfile}
+                    isSaving={isSavingProfile}
+                    editForm={editForm}
+                    setEditForm={setEditForm}
+                    startEditing={startEditing}
+                    onUpdate={handleProfileUpdate}
+                  />
+                )}
               </motion.div>
             </AnimatePresence>
           </main>
@@ -312,6 +418,138 @@ const AlumniInvestorDashboard = () => {
 };
 
 // --- VIEWS ---
+
+const AlumniGuide = ({ setActiveTab }: { setActiveTab: (tab: AlumniTab) => void }) => {
+  const steps = [
+    {
+      emoji: "🛡️",
+      title: "Verify Alumni Shield",
+      desc: "Complete your professional profile and link your alma mater. This confirms your status and builds trust with student founders.",
+      cta: "Verify Account",
+      tab: "kyc" as AlumniTab,
+      bg: "bg-emerald-50",
+      border: "border-emerald-100",
+      text: "text-emerald-700",
+      btnBg: "bg-emerald-600 hover:bg-emerald-700",
+    },
+    {
+      emoji: "🏛️",
+      title: "Browse Alma Mater Ventures",
+      desc: "Explore verified businesses from your school or other universities. Filter by industry, ROI, and student academic standing.",
+      cta: "Explore Ventures",
+      tab: "ventures" as AlumniTab,
+      bg: "bg-blue-50",
+      border: "border-blue-100",
+      text: "text-blue-700",
+      btnBg: "bg-blue-600 hover:bg-blue-700",
+    },
+    {
+      emoji: "🤝",
+      title: "Back the Next-Gen",
+      desc: "Invest in a student's vision. Your capital is paired with professional mentorship to help their startup cross the finish line.",
+      cta: "Find Ventures",
+      tab: "ventures" as AlumniTab,
+      bg: "bg-violet-50",
+      border: "border-violet-100",
+      text: "text-violet-700",
+      btnBg: "bg-[#534ab7] hover:bg-[#3c3489]",
+    },
+    {
+      emoji: "📊",
+      title: "Mentor & Earn",
+      desc: "Track your portfolio's performance. Receive repayments + ROI as the student reaches milestones and pays back the debt.",
+      cta: "Check Portfolio",
+      tab: "portfolio" as AlumniTab,
+      bg: "bg-green-50",
+      border: "border-green-100",
+      text: "text-green-700",
+      btnBg: "bg-green-600 hover:bg-green-700",
+    },
+  ];
+
+  const faqs = [
+    {
+      q: "Why should I invest as an alumnus?",
+      a: "Investing as an alumnus is a powerful way to 'give back' while earning a profit. You help students build credit history and businesses that create local jobs.",
+    },
+    {
+      q: "How secure is my investment?",
+      a: "All ventures are 'Credit-Proofed' via university records (CGPA, enrollment status) and identity documents. We also have a dedicated default recovery process.",
+    },
+    {
+      q: "Can I mentor the students I fund?",
+      a: "Yes! While the platform handles the financial transaction, we encourage Alumni to provide professional guidance to their funded student entrepreneurs.",
+    },
+    {
+      q: "What are the typical ROI rates?",
+      a: "Student ventures on our platform typically offer between 8% to 20% ROI over 3 to 12 month tenures, depending on the risk level.",
+    },
+  ];
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-12">
+      {/* Hero */}
+      <div className="bg-gradient-to-br from-green-700 via-[#1a7a4a] to-emerald-800 rounded-[2.5rem] p-10 text-white text-center relative overflow-hidden shadow-2xl shadow-green-900/30">
+        <div className="absolute inset-0 opacity-10 pointer-events-none">
+          <Sparkles size={400} className="absolute -right-20 -top-20 text-white" />
+        </div>
+        <div className="relative z-10 text-left md:text-center">
+          <div className="text-5xl mb-4">🏛️</div>
+          <h2 className="text-3xl font-black tracking-tight mb-3">The Alumni Network</h2>
+          <p className="text-emerald-50 font-medium text-lg max-w-xl mx-auto leading-relaxed">
+            Welcome back! As an <strong className="text-white">Alumni Investor</strong>, you hold the keys to a student's success. Turn your professional capital into student-preneur growth.
+          </p>
+          <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
+            onClick={() => setActiveTab("ventures")}
+            className="mt-8 bg-white text-emerald-800 font-black text-xs uppercase tracking-[0.2em] px-10 py-4 rounded-full shadow-xl hover:-translate-y-1 transition-all"
+          >
+            Browse New-Gen Founders
+          </button>
+        </div>
+      </div>
+
+      {/* Steps */}
+      <div>
+        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-6 px-1">Your Path — 4 Simple Steps</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {steps.map((step, i) => (
+            <div key={i} className={`${step.bg} border-2 ${step.border} rounded-[2rem] p-7 flex flex-col gap-4 hover:-translate-y-1 transition-all shadow-sm text-left`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-2xl bg-white flex items-center justify-center text-xl shadow-sm`}>
+                  {step.emoji}
+                </div>
+                <span className={`text-[10px] font-black uppercase tracking-widest ${step.text}`}>Step {i + 1}</span>
+              </div>
+              <h4 className="text-base font-black text-slate-800 tracking-tight leading-tight">{step.title}</h4>
+              <p className="text-sm font-medium text-slate-600 leading-relaxed flex-1">{step.desc}</p>
+              <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
+                onClick={() => setActiveTab(step.tab)}
+                className={`self-start ${step.btnBg} text-white text-[10px] font-black uppercase tracking-[0.2em] px-6 py-3 rounded-xl transition-all shadow-sm flex items-center gap-2`}
+              >
+                {step.cta} <ArrowRight size={12} />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* FAQ */}
+      <div>
+        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-6 px-1">Alumni FAQ</h3>
+        <div className="space-y-3">
+          {faqs.map((faq, i) => (
+            <div key={i} className="bg-white border-2 border-slate-100 rounded-[1.5rem] p-6 shadow-sm text-left">
+              <h4 className="font-black text-slate-800 text-sm mb-2 flex items-center gap-2">
+                <span className="text-emerald-500">Q.</span> {faq.q}
+              </h4>
+              <p className="text-sm font-medium text-slate-500 leading-relaxed pl-5">{faq.a}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const AlumniOverview = ({ formatNaira, profile, setActiveTab }: any) => {
   const chartData = {
@@ -577,7 +815,7 @@ const AlumniVentures = ({ formatNaira, onSelect }: any) => {
 
              <div className="mt-auto grid grid-cols-2 gap-3">
                 <button onClick={() => onSelect(v)} className="py-3 bg-[#e6f4ed] text-[#1a7a4a] font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-[#d1ebd9] transition-colors">View Profile</button>
-                <button className="py-3 bg-[#1a7a4a] text-white font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-green-800 transition-colors shadow-lg shadow-green-700/20">Fund Venture</button>
+                <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} className="py-3 bg-[#1a7a4a] text-white font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-green-800 transition-colors shadow-lg shadow-green-700/20">Fund Venture</button>
              </div>
           </div>
         ))}
@@ -652,26 +890,185 @@ const AlumniNotifications = () => {
   );
 };
 
-const AlumniProfile = ({ profile }: any) => {
+const AlumniProfile = ({ 
+  profile, 
+  isEditing, 
+  setIsEditing, 
+  isSaving, 
+  editForm, 
+  setEditForm, 
+  startEditing, 
+  onUpdate 
+}: any) => {
+  const displayName = profile?.full_name || "Alumni Investor";
   return (
-    <div className="max-w-md mx-auto bg-white p-8 rounded-[2.5rem] border-2 border-slate-100 shadow-sm">
-      <div className="w-24 h-24 rounded-full bg-[#1a7a4a] text-white flex items-center justify-center mx-auto mb-6 text-3xl font-black shadow-lg">
-        {profile?.full_name?.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || "EC"}
-      </div>
-      <div className="space-y-4">
-         {[
-           { l: "Full name", v: profile?.full_name || "Emeka Chukwu" },
-           { l: "Investor type", v: "Alumni investor" },
-           { l: "Alma mater", v: "University of Lagos" },
-           { l: "Graduation year", v: "2018" },
-           { l: "Occupation", v: "Software engineer" },
-           { l: "Member since", v: "October 2023" }
-         ].map((r, i) => (
-           <div key={i} className="flex justify-between items-center py-2 border-b border-slate-100 last:border-0">
-              <span className="text-[11px] font-black uppercase text-slate-400 tracking-widest">{r.l}</span>
-              <span className="text-sm font-black text-slate-800 text-right">{r.v}</span>
+    <div className="space-y-6">
+      <div className="bg-white border text-left border-black/5 rounded-[2.5rem] p-8 shadow-sm">
+        <div className="flex flex-col items-center mb-8">
+           <div className="w-20 h-20 rounded-full bg-emerald-50 flex items-center justify-center text-3xl font-bold text-[#1a7a4a] mb-4 ring-4 ring-[#1a7a4a]/5">
+             {displayName.substring(0, 2).toUpperCase()}
            </div>
-         ))}
+           <h3 className="text-xl font-black text-slate-800 tracking-tight">{displayName}</h3>
+           <p className="text-xs font-black text-[#1a7a4a] uppercase tracking-[0.2em] mt-1 bg-emerald-50 px-3 py-1 rounded-full">Alumni Investor</p>
+        </div>
+        
+        {!isEditing ? (
+          <div className="space-y-4">
+            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Basic Information</h4>
+            <div className="space-y-0 divide-y divide-black/5">
+              <div className="flex justify-between py-3 text-sm">
+                <span className="text-slate-500 font-semibold tracking-wide">Full Name</span>
+                <span className="text-slate-800 font-black">{profile?.full_name || "Not provided"}</span>
+              </div>
+              <div className="flex justify-between py-3 text-sm">
+                <span className="text-slate-500 font-semibold tracking-wide">Occupation</span>
+                <span className="text-slate-800 font-black">{profile?.occupation || "Not provided"}</span>
+              </div>
+              <div className="flex justify-between py-3 text-sm">
+                <span className="text-slate-500 font-semibold tracking-wide">Phone Number</span>
+                <span className="text-slate-800 font-black">{profile?.phone_number || "Not provided"}</span>
+              </div>
+              <div className="flex justify-between py-3 text-sm">
+                <span className="text-slate-500 font-semibold tracking-wide">KYC Status</span>
+                <span className={`font-black uppercase tracking-wider text-[10px] ${profile?.kyc_status === 'verified' ? 'text-green-600' : 'text-orange-500'}`}>{profile?.kyc_status || "Pending"}</span>
+              </div>
+            </div>
+
+            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mt-8 mb-1">Financial & Identity Info</h4>
+            <div className="space-y-0 divide-y divide-black/5">
+              <div className="flex justify-between py-3 text-sm">
+                <span className="text-slate-500 font-semibold tracking-wide">BVN (KYC)</span>
+                <span className="text-slate-800 font-black">{profile?.bvn ? `XXXXXX${profile.bvn.slice(-4)}` : "Pending"}</span>
+              </div>
+              <div className="flex justify-between py-3 text-sm">
+                <span className="text-slate-500 font-semibold tracking-wide">Bank Details</span>
+                <span className="text-slate-800 font-black">{profile?.bank_name ? `${profile.bank_name} - ${profile.bank_account_number}` : "Pending"}</span>
+              </div>
+              <div className="flex justify-between py-3 text-sm">
+                <span className="text-slate-500 font-semibold tracking-wide">Current Residence</span>
+                <span className="text-slate-800 font-black">{profile?.address ? `${profile.address}, ${profile.state}` : "Pending"}</span>
+              </div>
+              <div className="flex justify-between py-3 text-sm">
+                <span className="text-slate-500 font-semibold tracking-wide">NIN</span>
+                <span className="text-slate-800 font-black">{profile?.national_id_number || "N/A"}</span>
+              </div>
+              <div className="flex justify-between py-3 text-sm">
+                <span className="text-slate-500 font-semibold tracking-wide">Date of Birth</span>
+                <span className="text-slate-800 font-black">{profile?.date_of_birth || "N/A"}</span>
+              </div>
+              <div className="flex justify-between py-3 text-sm">
+                <span className="text-slate-500 font-semibold tracking-wide">Member Since</span>
+                <span className="text-green-600 font-black">{profile?.created_at ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : "N/A"}</span>
+              </div>
+            </div>
+
+            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mt-8 mb-1">Social Handles</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 rounded-[1.5rem] bg-slate-50 border border-black/5 text-[11px] font-black tracking-wide text-slate-500 flex items-center gap-2">
+                <span className="text-[#1a7a4a]">Instagram:</span> {profile?.instagram_handle || "None"}
+              </div>
+              <div className="p-4 rounded-[1.5rem] bg-slate-50 border border-black/5 text-[11px] font-black tracking-wide text-slate-500 flex items-center gap-2">
+                <span className="text-[#1a7a4a]">X/Twitter:</span> {profile?.twitter_handle || "None"}
+              </div>
+            </div>
+
+            <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
+              onClick={startEditing}
+              className="w-full py-4 mt-8 border-2 border-[#1a7a4a] text-[#1a7a4a] font-black text-[11px] uppercase tracking-[0.2em] rounded-2xl hover:bg-emerald-50 transition-all shadow-sm"
+            >
+              Edit Complete Profile
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={onUpdate} className="space-y-8 max-h-[60vh] overflow-y-auto px-2 pr-4 custom-scrollbar text-left">
+            <div className="space-y-4">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#1a7a4a] mb-3">Basic Details</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Full Name</label>
+                  <input required type="text" value={editForm.fullName} onChange={(e) => setEditForm({...editForm, fullName: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#1a7a4a]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Phone</label>
+                  <input type="text" value={editForm.phoneNumber} onChange={(e) => setEditForm({...editForm, phoneNumber: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#1a7a4a]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Occupation</label>
+                  <input type="text" value={editForm.occupation} onChange={(e) => setEditForm({...editForm, occupation: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#1a7a4a]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 pt-6 border-t border-black/5">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#1a7a4a] mb-3">KYC Info</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">11-Digit BVN</label>
+                  <input type="text" value={editForm.bvn} onChange={(e) => setEditForm({...editForm, bvn: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#1a7a4a]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">NIN (11 Digits)</label>
+                  <input type="text" maxLength={11} value={editForm.nationalIdNumber} onChange={(e) => setEditForm({...editForm, nationalIdNumber: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#1a7a4a]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Bank Name</label>
+                  <input type="text" value={editForm.bankName} onChange={(e) => setEditForm({...editForm, bankName: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#1a7a4a]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Account Number</label>
+                  <input type="text" value={editForm.accountNumber} onChange={(e) => setEditForm({...editForm, accountNumber: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#1a7a4a]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Residential Address</label>
+                  <input type="text" value={editForm.address} onChange={(e) => setEditForm({...editForm, address: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#1a7a4a]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">State</label>
+                  <input type="text" value={editForm.state} onChange={(e) => setEditForm({...editForm, state: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#1a7a4a]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Date of Birth</label>
+                  <input type="date" value={editForm.dateOfBirth} onChange={(e) => setEditForm({...editForm, dateOfBirth: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#1a7a4a]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 pt-6 border-t border-black/5">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#1a7a4a] mb-3">Professional Socials</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Instagram</label>
+                  <input type="text" value={editForm.instagram} onChange={(e) => setEditForm({...editForm, instagram: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#1a7a4a]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">X/Twitter</label>
+                  <input type="text" value={editForm.twitter} onChange={(e) => setEditForm({...editForm, twitter: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#1a7a4a]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Facebook</label>
+                  <input type="text" value={editForm.facebook} onChange={(e) => setEditForm({...editForm, facebook: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#1a7a4a]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-4 pt-8 sticky bottom-0 bg-white pb-4">
+              <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
+                type="button"
+                onClick={() => setIsEditing(false)}
+                className="flex-[1] py-4 border-2 border-slate-200 text-slate-500 font-black tracking-widest uppercase text-[10px] rounded-2xl hover:bg-slate-50 transition-all"
+              >
+                Discard
+              </button>
+              <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
+                type="submit"
+                disabled={isSaving}
+                className="flex-[2] py-4 bg-[#1a7a4a] text-white font-black tracking-widest uppercase text-[10px] rounded-2xl shadow-xl shadow-green-900/20 hover:-translate-y-1 transition-all disabled:opacity-50 disabled:-translate-y-0"
+              >
+                {isSaving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto"></div> : "Apply Changes"}
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );
@@ -813,7 +1210,7 @@ const CreditProfileModal = ({ venture, onClose, formatNaira, type }: any) => {
 
            <div className="flex gap-4">
                <button onClick={onClose} className="flex-1 py-4 text-xs font-black uppercase tracking-widest bg-white border-2 border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">Back to ventures</button>
-               <button className="flex-[2] py-4 text-xs font-black uppercase tracking-widest bg-[#1a7a4a] text-white rounded-xl shadow-lg shadow-green-700/30 hover:bg-green-800 hover:-translate-y-1 transition-all">Fund {venture.name}</button>
+               <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} className="flex-[2] py-4 text-xs font-black uppercase tracking-widest bg-[#1a7a4a] text-white rounded-xl shadow-lg shadow-green-700/30 hover:bg-green-800 hover:-translate-y-1 transition-all">Fund {venture.name}</button>
            </div>
         </div>
       </motion.div>
@@ -844,7 +1241,7 @@ const AlumniKYC = ({
               <p className="text-emerald-700 text-xs font-bold uppercase tracking-widest">Alumni trust protocol enabled</p>
             </div>
           </div>
-          <button 
+          <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
             onClick={() => setShowForm(true)}
             className="w-full md:w-auto bg-[#1a7a4a] hover:bg-green-700 text-white font-black text-[11px] uppercase tracking-[0.2em] px-10 py-5 rounded-2xl shadow-xl shadow-green-950/20 transition-all hover:-translate-y-1"
           >
@@ -861,7 +1258,7 @@ const AlumniKYC = ({
         >
           <div className="absolute top-0 right-0 w-64 h-64 bg-green-50 rounded-full blur-3xl -mr-32 -mt-32 opacity-50 pointer-events-none"></div>
           
-          <button 
+          <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
             onClick={() => setShowForm(false)} 
             className="absolute top-8 right-8 text-slate-300 hover:bg-slate-50 p-2 rounded-full transition-all z-10"
           >
@@ -882,12 +1279,12 @@ const AlumniKYC = ({
                   <input required type="tel" value={formData.phoneNumber} onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})} placeholder="081 2345 6789" className="w-full px-6 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:outline-none focus:ring-4 focus:ring-green-500/5 text-sm font-bold" />
                 </div>
                 <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-slate-500 ml-1 tracking-widest">Current Occupation</label>
+                  <input required type="text" value={formData.occupation} onChange={(e) => setFormData({...formData, occupation: e.target.value})} placeholder="Software Engineer at Flutterwave" className="w-full px-6 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:outline-none focus:ring-4 focus:ring-green-500/5 text-sm font-bold" />
+                </div>
+                <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-slate-500 ml-1 tracking-widest">11-Digit BVN</label>
                   <input required type="text" maxLength={11} value={formData.bvn} onChange={(e) => setFormData({...formData, bvn: e.target.value})} placeholder="National bank verification" className="w-full px-6 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:outline-none focus:ring-4 focus:ring-green-500/5 text-sm font-bold" />
-                </div>
-                <div className="space-y-2 sm:col-span-2">
-                  <label className="text-[10px] font-black uppercase text-slate-500 ml-1 tracking-widest">Current Residential Address</label>
-                  <input required type="text" value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} placeholder="Full address for residency proof" className="w-full px-6 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:outline-none focus:ring-4 focus:ring-green-500/5 text-sm font-bold" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-slate-500 ml-1 tracking-widest">Bank Details</label>
@@ -895,6 +1292,10 @@ const AlumniKYC = ({
                     <input required type="text" value={formData.bankName} onChange={(e) => setFormData({...formData, bankName: e.target.value})} placeholder="Bank" className="w-full px-4 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-green-500/10 text-xs font-bold" />
                     <input required type="text" value={formData.accountNumber} onChange={(e) => setFormData({...formData, accountNumber: e.target.value})} placeholder="Account" className="w-full px-4 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-green-500/10 text-xs font-bold" />
                   </div>
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <label className="text-[10px] font-black uppercase text-slate-500 ml-1 tracking-widest">Current Residential Address</label>
+                  <input required type="text" value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} placeholder="Full address for residency proof" className="w-full px-6 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:outline-none focus:ring-4 focus:ring-green-500/5 text-sm font-bold" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-slate-500 ml-1 tracking-widest">Date of Birth</label>
@@ -947,9 +1348,10 @@ const AlumniKYC = ({
                 { label: "Government/Alumni ID", stat: profile?.student_id_url ? "Uploaded" : "Pending", confirmed: !!profile?.student_id_url },
                 { label: "Phone & Mobile Security", stat: profile?.phone_number ? "Verified" : "Required", confirmed: !!profile?.phone_number },
                 { label: "National BVN Submission", stat: profile?.bvn ? "Submitted" : "Required", confirmed: !!profile?.bvn },
+                { label: "Professional Occupation", stat: profile?.occupation ? "Confirmed" : "Required", confirmed: !!profile?.occupation },
                 { label: "Residential Proof (Address)", stat: profile?.address ? "Confirmed" : "Required", confirmed: !!profile?.address },
                 { label: "Bank Settlement Details", stat: profile?.bank_account_number ? "Linked" : "Required", confirmed: !!profile?.bank_account_number },
-                { label: "Professional Identity", stat: (profile?.grad_year || profile?.job_title) ? "Confirmed" : "Pending", confirmed: (!!profile?.grad_year || !!profile?.job_title) }
+                { label: "Social Media Identity", stat: (profile?.instagram_handle || profile?.twitter_handle) ? "Linked" : "Pending", confirmed: (!!profile?.instagram_handle || !!profile?.twitter_handle) }
               ].map((row, i) => (
                 <div key={i} className="flex justify-between items-center py-5 group transition-all text-left">
                   <div className="flex items-center gap-5">
@@ -966,7 +1368,7 @@ const AlumniKYC = ({
             </div>
             
             {profile?.kyc_status !== 'verified' && (
-              <button 
+              <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
                 onClick={() => setShowForm(true)}
                 className="w-full py-6 mt-10 border-4 border-dashed border-emerald-50 text-[#1a7a4a] font-black text-[11px] uppercase tracking-[0.2em] rounded-3xl hover:bg-emerald-50 transition-all font-sans"
               >
@@ -980,87 +1382,5 @@ const AlumniKYC = ({
   );
 };
 
-const AlumniGuide = ({ setActiveTab }: { setActiveTab: (tab: AlumniTab) => void }) => {
-  const steps = [
-    {
-      num: "1",
-      title: "Create Account",
-      desc: "Sign up and complete identity verification (KYC) to ensure platform security.",
-      icon: <User className="w-6 h-6" />,
-      color: "bg-green-500"
-    },
-    {
-      num: "2",
-      title: "Browse Ventures",
-      desc: "Explore approved student businesses filtered by category, risk level, and return rate.",
-      icon: <Search className="w-6 h-6" />,
-      color: "bg-emerald-500"
-    },
-    {
-      num: "3",
-      title: "Invest & Track",
-      desc: "Invest any amount and monitor your portfolio with real-time updates and analytics.",
-      icon: <TrendingUp className="w-6 h-6" />,
-      color: "bg-teal-500"
-    },
-    {
-      num: "4",
-      title: "Earn Returns",
-      desc: "Receive your principal plus fixed returns (up to 15%) when loans mature.",
-      icon: <Wallet className="w-6 h-6" />,
-      color: "bg-green-600"
-    }
-  ];
-
-  return (
-    <div className="max-w-4xl mx-auto">
-      <div className="bg-white border border-black/5 rounded-[2.5rem] p-8 md:p-12 shadow-sm relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-green-50 rounded-full blur-3xl -mr-20 -mt-20"></div>
-        
-        <div className="relative z-10">
-          <h2 className="text-3xl font-black text-slate-800 mb-4 tracking-tight text-left">Alumni Investor Roadmap</h2>
-          <p className="text-slate-500 font-medium mb-12 max-w-2xl leading-relaxed text-left">
-            Empower the next generation of student entrepreneurs. Your experience and capital can transform a student business into a success story.
-          </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {steps.map((step, i) => (
-              <motion.div 
-                key={i}
-                whileHover={{ y: -5 }}
-                className="flex gap-6 p-6 rounded-3xl bg-slate-50/50 border border-black/5 hover:bg-white hover:shadow-xl hover:shadow-green-500/5 transition-all text-left"
-              >
-                <div className={`w-14 h-14 rounded-2xl ${step.color} text-white flex items-center justify-center text-xl font-black shadow-lg flex-shrink-0`}>
-                  {step.num}
-                </div>
-                <div>
-                  <h3 className="text-lg font-black text-slate-800 mb-1">{step.title}</h3>
-                  <p className="text-slate-500 text-[13px] font-bold leading-relaxed">{step.desc}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-          
-          <div className="mt-12 pt-8 border-t border-black/5 flex flex-col sm:flex-row items-center justify-end gap-4">
-            <button 
-              onClick={() => setActiveTab("kyc")}
-              className="w-full sm:w-auto px-8 py-4 bg-orange-500 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-orange-500/20 hover:-translate-y-1 transition-all flex items-center justify-center gap-2"
-            >
-              <ShieldAlert size={18} />
-              Complete Verification
-            </button>
-            <button 
-              onClick={() => setActiveTab("ventures")}
-              className="w-full sm:w-auto px-8 py-4 bg-[#1a7a4a] text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-green-500/20 hover:-translate-y-1 transition-all flex items-center justify-center gap-2"
-            >
-              <TrendingUp size={18} />
-              Start Investing
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export default AlumniInvestorDashboard;

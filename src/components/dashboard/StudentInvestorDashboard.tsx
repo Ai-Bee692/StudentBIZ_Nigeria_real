@@ -86,7 +86,132 @@ const StudentInvestorDashboard = () => {
     instagramHandle: profile?.instagram_handle || "",
     twitterHandle: profile?.twitter_handle || "",
     facebookHandle: profile?.facebook_handle || "",
+    schoolEntryYear: profile?.school_entry_year || "",
+    courseDuration: profile?.course_duration || "",
+    graduationYear: profile?.graduation_year || "",
+    courseOfStudy: profile?.course_of_study || "",
   });
+
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [editForm, setEditForm] = useState({
+    fullName: profile?.full_name || "",
+    phoneNumber: profile?.phone_number || "",
+    schoolName: profile?.school_name || "",
+    matricNumber: profile?.matric_number || "",
+    bvn: profile?.bvn || "",
+    bankName: profile?.bank_name || "",
+    accountNumber: profile?.bank_account_number || "",
+    address: profile?.address || "",
+    state: profile?.state || "",
+    dateOfBirth: profile?.date_of_birth || "",
+    nationalIdNumber: profile?.national_id_number || "",
+    semesterGpa: profile?.semester_gpa?.toString() || "",
+    cgpa: profile?.cgpa?.toString() || "",
+    instagram: profile?.instagram_handle || "",
+    twitter: profile?.twitter_handle || "",
+    facebook: profile?.facebook_handle || "",
+    schoolEntryYear: profile?.school_entry_year || "",
+    courseDuration: profile?.course_duration || "",
+    graduationYear: profile?.graduation_year || "",
+    courseOfStudy: profile?.course_of_study || "",
+  });
+
+  const startEditing = () => {
+    setEditForm({
+      fullName: profile?.full_name || "",
+      phoneNumber: profile?.phone_number || "",
+      schoolName: profile?.school_name || "",
+      matricNumber: profile?.matric_number || "",
+      bvn: profile?.bvn || "",
+      bankName: profile?.bank_name || "",
+      accountNumber: profile?.bank_account_number || "",
+      address: profile?.address || "",
+      state: profile?.state || "",
+      dateOfBirth: profile?.date_of_birth || "",
+      nationalIdNumber: profile?.national_id_number || "",
+      semesterGpa: profile?.semester_gpa?.toString() || "",
+      cgpa: profile?.cgpa?.toString() || "",
+      instagram: profile?.instagram_handle || "",
+      twitter: profile?.twitter_handle || "",
+      facebook: profile?.facebook_handle || "",
+      schoolEntryYear: profile?.school_entry_year || "",
+      courseDuration: profile?.course_duration || "",
+      graduationYear: profile?.graduation_year || "",
+      courseOfStudy: profile?.course_of_study || "",
+    });
+    setIsEditingProfile(true);
+  };
+
+  const handleProfileUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profile?.id) return;
+
+    setIsSavingProfile(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: editForm.fullName,
+          phone_number: editForm.phoneNumber,
+          school_name: editForm.schoolName,
+          matric_number: editForm.matricNumber,
+          bvn: editForm.bvn,
+          bank_name: editForm.bankName,
+          bank_account_number: editForm.accountNumber,
+          address: editForm.address,
+          state: editForm.state,
+          date_of_birth: editForm.dateOfBirth,
+          national_id_number: editForm.nationalIdNumber,
+          semester_gpa: editForm.semesterGpa ? parseFloat(editForm.semesterGpa) : null,
+          cgpa: editForm.cgpa ? parseFloat(editForm.cgpa) : null,
+          instagram_handle: editForm.instagram,
+          twitter_handle: editForm.twitter,
+          facebook_handle: editForm.facebook,
+          school_entry_year: editForm.schoolEntryYear,
+          course_duration: editForm.courseDuration,
+          graduation_year: editForm.graduationYear,
+          course_of_study: editForm.courseOfStudy,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', profile.id);
+
+      if (error) throw error;
+
+      toast({ title: "Profile Updated", description: "Your changes have been saved successfully." });
+      
+      // Update local profile object
+      if (profile) {
+        profile.full_name = editForm.fullName;
+        profile.phone_number = editForm.phoneNumber;
+        profile.school_name = editForm.schoolName;
+        profile.matric_number = editForm.matricNumber;
+        profile.bvn = editForm.bvn;
+        profile.bank_name = editForm.bankName;
+        profile.bank_account_number = editForm.accountNumber;
+        profile.address = editForm.address;
+        profile.state = editForm.state;
+        profile.date_of_birth = editForm.dateOfBirth;
+        profile.national_id_number = editForm.nationalIdNumber;
+        profile.semester_gpa = editForm.semesterGpa ? parseFloat(editForm.semesterGpa) : null;
+        profile.cgpa = editForm.cgpa ? parseFloat(editForm.cgpa) : null;
+        profile.instagram_handle = editForm.instagram;
+        profile.twitter_handle = editForm.twitter;
+        profile.facebook_handle = editForm.facebook;
+        profile.school_entry_year = editForm.schoolEntryYear;
+        profile.course_duration = editForm.courseDuration;
+        profile.graduation_year = editForm.graduationYear;
+        profile.course_of_study = editForm.courseOfStudy;
+      }
+
+      setIsEditingProfile(false);
+    } catch (err: any) {
+      console.error("Profile update error:", err);
+      toast({ title: "Update Failed", description: err.message, variant: "destructive" });
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
 
   const formatNaira = (amt: number) => {
     return new Intl.NumberFormat('en-NG', {
@@ -160,6 +285,10 @@ const StudentInvestorDashboard = () => {
         instagram_handle: kycForm.instagramHandle || profile?.instagram_handle,
         twitter_handle: kycForm.twitterHandle || profile?.twitter_handle,
         facebook_handle: kycForm.facebookHandle || profile?.facebook_handle,
+        school_entry_year: kycForm.schoolEntryYear || profile?.school_entry_year,
+        course_duration: kycForm.courseDuration || profile?.course_duration,
+        graduation_year: kycForm.graduationYear || profile?.graduation_year,
+        course_of_study: kycForm.courseOfStudy || profile?.course_of_study,
         student_id_url: studentIdUrl,
         kyc_status: 'under_review',
         kyc_submitted_at: new Date().toISOString(),
@@ -254,7 +383,7 @@ const StudentInvestorDashboard = () => {
               { id: "notifications", label: "Updates 🔔" },
               { id: "profile", label: "My Vibe 👤" }
             ].map((tab) => (
-              <button
+              <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as StudentTab)}
                 className={`py-5 text-[13px] font-extrabold uppercase tracking-wide whitespace-nowrap transition-all relative ${
@@ -303,7 +432,18 @@ const StudentInvestorDashboard = () => {
                   />
                 )}
                 {activeTab === "notifications" && <StudentNotifications />}
-                {activeTab === "profile" && <StudentProfile profile={profile} />}
+                {activeTab === "profile" && (
+                  <StudentProfile 
+                    profile={profile} 
+                    isEditing={isEditingProfile}
+                    setIsEditing={setIsEditingProfile}
+                    isSaving={isSavingProfile}
+                    editForm={editForm}
+                    setEditForm={setEditForm}
+                    startEditing={startEditing}
+                    onUpdate={handleProfileUpdate}
+                  />
+                )}
               </motion.div>
             </AnimatePresence>
           </main>
@@ -325,6 +465,138 @@ const StudentInvestorDashboard = () => {
 };
 
 // --- VIEWS ---
+
+const StudentGuide = ({ setActiveTab }: { setActiveTab: (tab: StudentTab) => void }) => {
+  const steps = [
+    {
+      emoji: "🛡️",
+      title: "Complete Your KYC",
+      desc: "Start by verifying your identity with your student ID, matric number, and BVN. This unlocks full access to peer ventures.",
+      cta: "Go to KYC",
+      tab: "kyc" as StudentTab,
+      bg: "bg-orange-50",
+      border: "border-orange-100",
+      text: "text-orange-600",
+      btnBg: "bg-orange-500 hover:bg-orange-600",
+    },
+    {
+      emoji: "🔍",
+      title: "Browse Peer Ventures",
+      desc: "Explore verified student businesses from universities across Nigeria. Each listing shows ROI, tenure, and a trust score.",
+      cta: "Explore Ventures",
+      tab: "ventures" as StudentTab,
+      bg: "bg-blue-50",
+      border: "border-blue-100",
+      text: "text-blue-600",
+      btnBg: "bg-blue-500 hover:bg-blue-600",
+    },
+    {
+      emoji: "💸",
+      title: "Fund a Peer",
+      desc: "Pick a venture that matches your risk appetite and invest from as low as ₦5,000. Funds go directly to the student entrepreneur.",
+      cta: "View Portfolio",
+      tab: "portfolio" as StudentTab,
+      bg: "bg-violet-50",
+      border: "border-violet-100",
+      text: "text-violet-600",
+      btnBg: "bg-violet-600 hover:bg-violet-700",
+    },
+    {
+      emoji: "📈",
+      title: "Earn Returns",
+      desc: "Get your principal + agreed ROI repaid directly into your StudentBIZ balance at the end of the tenure. Track it live.",
+      cta: "My Portfolio",
+      tab: "portfolio" as StudentTab,
+      bg: "bg-green-50",
+      border: "border-green-100",
+      text: "text-green-600",
+      btnBg: "bg-green-600 hover:bg-green-700",
+    },
+  ];
+
+  const faqs = [
+    {
+      q: "Is my money safe?",
+      a: "All ventures are verified through StudentBIZ's academic portal integration. In addition, every borrower undergoes a credit check before listing.",
+    },
+    {
+      q: "What is the minimum investment?",
+      a: "You can start funding a peer venture from as low as ₦5,000. There's no maximum cap per venture.",
+    },
+    {
+      q: "When do I get paid back?",
+      a: "Returns are credited at the end of the agreed tenure (e.g. 6 months). You'll receive principal + ROI in your StudentBIZ balance.",
+    },
+    {
+      q: "What if a peer defaults?",
+      a: "StudentBIZ has a Student Protection Fund that covers up to 70% of your investment in verified default cases.",
+    },
+  ];
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-12">
+      {/* Hero */}
+      <div className="bg-gradient-to-br from-violet-600 to-indigo-700 rounded-[2.5rem] p-10 text-white text-center relative overflow-hidden shadow-2xl shadow-violet-500/30">
+        <div className="absolute inset-0 opacity-10 pointer-events-none">
+          <Sparkles size={400} className="absolute -right-20 -top-20 text-white" />
+        </div>
+        <div className="relative z-10">
+          <div className="text-5xl mb-4">💡</div>
+          <h2 className="text-3xl font-black tracking-tight mb-3">How StudentBIZ Works</h2>
+          <p className="text-indigo-200 font-medium text-lg max-w-xl mx-auto leading-relaxed">
+            You're a <strong className="text-white">Student Investor</strong>. That means you can back your peers' businesses and earn real returns — all within a verified, campus-safe ecosystem.
+          </p>
+          <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
+            onClick={() => setActiveTab("ventures")}
+            className="mt-8 bg-white text-violet-700 font-black text-xs uppercase tracking-[0.2em] px-10 py-4 rounded-full shadow-xl hover:-translate-y-1 transition-all"
+          >
+            Start Investing Now
+          </button>
+        </div>
+      </div>
+
+      {/* Steps */}
+      <div>
+        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-6 px-1">Your Journey — 4 Simple Steps</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {steps.map((step, i) => (
+            <div key={i} className={`${step.bg} border-2 ${step.border} rounded-[2rem] p-7 flex flex-col gap-4 hover:-translate-y-1 transition-all shadow-sm`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-2xl bg-white flex items-center justify-center text-xl shadow-sm`}>
+                  {step.emoji}
+                </div>
+                <span className={`text-[10px] font-black uppercase tracking-widest ${step.text}`}>Step {i + 1}</span>
+              </div>
+              <h4 className="text-base font-black text-slate-800 tracking-tight leading-tight">{step.title}</h4>
+              <p className="text-sm font-medium text-slate-600 leading-relaxed flex-1">{step.desc}</p>
+              <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
+                onClick={() => setActiveTab(step.tab)}
+                className={`self-start ${step.btnBg} text-white text-[10px] font-black uppercase tracking-[0.2em] px-6 py-3 rounded-xl transition-all shadow-sm flex items-center gap-2`}
+              >
+                {step.cta} <ArrowRight size={12} />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* FAQ */}
+      <div>
+        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-6 px-1">Frequently Asked Questions</h3>
+        <div className="space-y-3">
+          {faqs.map((faq, i) => (
+            <div key={i} className="bg-white border-2 border-slate-100 rounded-[1.5rem] p-6 shadow-sm">
+              <h4 className="font-black text-slate-800 text-sm mb-2 flex items-center gap-2">
+                <span className="text-violet-500">Q.</span> {faq.q}
+              </h4>
+              <p className="text-sm font-medium text-slate-500 leading-relaxed pl-5">{faq.a}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const StudentOverview = ({ formatNaira, profile, setActiveTab }: any) => {
   const chartData = {
@@ -435,7 +707,7 @@ const StudentOverview = ({ formatNaira, profile, setActiveTab }: any) => {
               <p className="text-sm font-medium text-indigo-100 mb-6 leading-relaxed">
                 Sleep easy! Every peer venture is verified by studentBiz and the University portal.
               </p>
-              <button className="w-full bg-white text-indigo-600 py-3.5 rounded-2xl font-black tracking-wide shadow-lg hover:bg-indigo-50 transition-colors">
+              <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} className="w-full bg-white text-indigo-600 py-3.5 rounded-2xl font-black tracking-wide shadow-lg hover:bg-indigo-50 transition-colors">
                 Learn The Process
               </button>
             </div>
@@ -463,7 +735,7 @@ const StudentOverview = ({ formatNaira, profile, setActiveTab }: any) => {
                   </div>
                 </div>
               ))}
-              <button className="w-full py-3 mt-2 text-sm font-black text-violet-600 bg-violet-50 rounded-xl hover:bg-violet-100 transition-colors">
+              <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} className="w-full py-3 mt-2 text-sm font-black text-violet-600 bg-violet-50 rounded-xl hover:bg-violet-100 transition-colors">
                 View All Schedule
               </button>
             </div>
@@ -550,13 +822,13 @@ const StudentVentures = ({ formatNaira, onSelect }: any) => {
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <button 
+            <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
               onClick={() => onSelect(v)}
               className="py-2.5 text-[9px] font-black uppercase tracking-widest text-[#534ab7] bg-[#eeedfe] rounded-xl hover:bg-[#534ab7]/10 transition-all"
             >
               Verify Profile
             </button>
-            <button className="py-2.5 text-[9px] font-black uppercase tracking-widest bg-[#534ab7] text-white rounded-xl shadow-lg shadow-[#534ab7]/20">
+            <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} className="py-2.5 text-[9px] font-black uppercase tracking-widest bg-[#534ab7] text-white rounded-xl shadow-lg shadow-[#534ab7]/20">
               Fund Peer
             </button>
           </div>
@@ -574,7 +846,7 @@ const StudentPortfolio = ({ formatNaira }: any) => {
            <Briefcase size={16} className="text-[#534ab7]" />
            Investment Ledger
          </h3>
-         <button className="bg-white border border-black/5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-2">
+         <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} className="bg-white border border-black/5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-2">
            Download Report <ArrowLeft size={12} className="rotate-90" />
          </button>
       </div>
@@ -625,8 +897,8 @@ const StudentSavings = ({ formatNaira }: any) => {
          <p className="text-[10px] uppercase font-black tracking-[0.3em] opacity-60 mb-2">Vault Balance</p>
          <h2 className="text-4xl font-black mb-6 tracking-tight tracking-naira">₦12,000</h2>
          <div className="flex justify-center gap-2">
-           <button className="flex-1 bg-white text-[#534ab7] py-3 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg">Deposit</button>
-           <button className="flex-1 bg-black/20 text-white py-3 rounded-2xl font-black text-xs uppercase tracking-widest border border-white/20">Invest from Vault</button>
+           <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} className="flex-1 bg-white text-[#534ab7] py-3 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg">Deposit</button>
+           <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} className="flex-1 bg-black/20 text-white py-3 rounded-2xl font-black text-xs uppercase tracking-widest border border-white/20">Invest from Vault</button>
          </div>
       </div>
       
@@ -656,7 +928,7 @@ const StudentNotifications = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between px-2">
          <h3 className="font-black text-sm uppercase tracking-widest">Recent Updates</h3>
-         <button className="text-[10px] font-black uppercase text-slate-400">Mark all read</button>
+         <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} className="text-[10px] font-black uppercase text-slate-400">Mark all read</button>
       </div>
       {[
         { title: "Investment Credited", body: "Adaeze Accessories paid ₦4,500 into your balance.", time: "2h ago", color: "green" },
@@ -676,43 +948,227 @@ const StudentNotifications = () => {
   );
 };
 
-const StudentProfile = ({ profile }: any) => {
+const StudentProfile = ({ 
+  profile, 
+  isEditing, 
+  setIsEditing, 
+  isSaving, 
+  editForm, 
+  setEditForm, 
+  startEditing, 
+  onUpdate 
+}: any) => {
+  const displayName = profile?.full_name || "Student Investor";
   return (
-    <div className="max-w-md mx-auto space-y-4">
-      <div className="bg-white p-8 rounded-[2.5rem] border border-black/5 text-center shadow-lg">
-        <div className="w-24 h-24 rounded-full bg-[#eeedfe] flex items-center justify-center mb-6 mx-auto border-[6px] border-white shadow-xl">
-           <User size={44} className="text-[#534ab7]" />
+    <div className="space-y-6">
+      <div className="bg-white border text-left border-black/5 rounded-[2.5rem] p-8 shadow-sm">
+        <div className="flex flex-col items-center mb-8">
+           <div className="w-20 h-20 rounded-full bg-[#eeedfe] flex items-center justify-center text-3xl font-bold text-[#534ab7] mb-4 ring-4 ring-[#534ab7]/5">
+             {displayName.substring(0, 2).toUpperCase()}
+           </div>
+           <h3 className="text-xl font-black text-slate-800 tracking-tight">{displayName}</h3>
+           <p className="text-xs font-black text-[#534ab7] uppercase tracking-[0.2em] mt-1 bg-[#eeedfe] px-3 py-1 rounded-full">Student Investor</p>
         </div>
-        <h3 className="text-2xl font-black text-slate-800 tracking-tight">{profile?.full_name}</h3>
-        <p className="text-[10px] font-black text-[#534ab7] uppercase tracking-[0.2em] opacity-80 mt-1">
-          {profile?.school_name || "OAU Ile-Ife"} &middot; {profile?.matric_number || "200-CS-0412"}
-        </p>
         
-        <div className="grid grid-cols-2 gap-2 mt-8">
-           <div className="bg-slate-50 p-3 rounded-2xl border border-black/5">
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Status</p>
-              <p className="text-xs font-black text-green-600 uppercase">Enrolled</p>
-           </div>
-           <div className="bg-slate-50 p-3 rounded-2xl border border-black/5">
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">CGPA</p>
-              <p className="text-xs font-black text-slate-800 uppercase">3.8 / 5.0</p>
-           </div>
-        </div>
+        {!isEditing ? (
+          <div className="space-y-4">
+            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Basic Information</h4>
+            <div className="space-y-0 divide-y divide-black/5">
+              <div className="flex justify-between py-3 text-sm">
+                <span className="text-slate-500 font-semibold tracking-wide">Full Name</span>
+                <span className="text-slate-800 font-black">{profile?.full_name || "Not provided"}</span>
+              </div>
+              <div className="flex justify-between py-3 text-sm">
+                <span className="text-slate-500 font-semibold tracking-wide">University</span>
+                <span className="text-slate-800 font-black">{profile?.school_name || "Not provided"}</span>
+              </div>
+              <div className="flex justify-between py-3 text-sm">
+                <span className="text-slate-500 font-semibold tracking-wide">Phone Number</span>
+                <span className="text-slate-800 font-black">{profile?.phone_number || "Not provided"}</span>
+              </div>
+              <div className="flex justify-between py-3 text-sm">
+                <span className="text-slate-500 font-semibold tracking-wide">KYC Status</span>
+                <span className={`font-black uppercase tracking-wider text-[10px] ${profile?.kyc_status === 'verified' ? 'text-green-600' : 'text-orange-500'}`}>{profile?.kyc_status || "Pending"}</span>
+              </div>
+            </div>
 
-        <div className="mt-8 pt-8 border-t border-black/5 space-y-4">
-           <div className="flex justify-between px-2">
-              <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Account Type</span>
-              <span className="text-xs font-black text-[#534ab7] uppercase">Student Investor</span>
-           </div>
-           <div className="flex justify-between px-2">
-              <span className="text-xs font-black text-slate-400 uppercase tracking-widest">KYC Status</span>
-              <span className="text-xs font-black text-orange-500 uppercase">Partial</span>
-           </div>
-        </div>
+            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mt-8 mb-1">Financial & Academic</h4>
+            <div className="space-y-0 divide-y divide-black/5">
+              <div className="flex justify-between py-3 text-sm">
+                <span className="text-slate-500 font-semibold tracking-wide">Matric Number</span>
+                <span className="text-slate-800 font-black">{profile?.matric_number || "Pending"}</span>
+              </div>
+              <div className="flex justify-between py-3 text-sm">
+                <span className="text-slate-500 font-semibold tracking-wide">BVN (KYC)</span>
+                <span className="text-slate-800 font-black">{profile?.bvn ? `XXXXXX${profile.bvn.slice(-4)}` : "Pending"}</span>
+              </div>
+              <div className="flex justify-between py-3 text-sm">
+                <span className="text-slate-500 font-semibold tracking-wide">Bank Details</span>
+                <span className="text-slate-800 font-black">{profile?.bank_name ? `${profile.bank_name} - ${profile.bank_account_number}` : "Pending"}</span>
+              </div>
+              <div className="flex justify-between py-3 text-sm">
+                <span className="text-slate-500 font-semibold tracking-wide">Department & Course</span>
+                <span className="text-slate-800 font-black">{profile?.course_of_study || "Pending"}</span>
+              </div>
+              <div className="flex justify-between py-3 text-sm">
+                <span className="text-slate-500 font-semibold tracking-wide">Academic CGPA</span>
+                <span className="text-slate-800 font-black">{profile?.cgpa || "N/A"}</span>
+              </div>
+              <div className="flex justify-between py-3 text-sm">
+                <span className="text-slate-500 font-semibold tracking-wide">Year of Entry</span>
+                <span className="text-slate-800 font-black">{profile?.school_entry_year || "N/A"}</span>
+              </div>
+              <div className="flex justify-between py-3 text-sm">
+                <span className="text-slate-500 font-semibold tracking-wide">Program Duration</span>
+                <span className="text-slate-800 font-black">{profile?.course_duration || "N/A"}</span>
+              </div>
+              <div className="flex justify-between py-3 text-sm">
+                <span className="text-slate-500 font-semibold tracking-wide">Graduation Year</span>
+                <span className="text-green-600 font-black">{profile?.graduation_year || "N/A"}</span>
+              </div>
+            </div>
 
-        <button className="w-full mt-8 py-4 bg-[#534ab7] text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-[#534ab7]/30 hover:-translate-y-1 transition-all">
-          Complete Full KYC
-        </button>
+            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mt-8 mb-1">Social Handles</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 rounded-[1.5rem] bg-slate-50 border border-black/5 text-[11px] font-black tracking-wide text-slate-500 flex items-center gap-2">
+                <span className="text-[#534ab7]">Instagram:</span> {profile?.instagram_handle || "None"}
+              </div>
+              <div className="p-4 rounded-[1.5rem] bg-slate-50 border border-black/5 text-[11px] font-black tracking-wide text-slate-500 flex items-center gap-2">
+                <span className="text-[#534ab7]">X/Twitter:</span> {profile?.twitter_handle || "None"}
+              </div>
+            </div>
+
+            <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
+              onClick={startEditing}
+              className="w-full py-4 mt-8 border-2 border-[#534ab7] text-[#534ab7] font-black text-[11px] uppercase tracking-[0.2em] rounded-2xl hover:bg-[#eeedfe]/50 transition-all shadow-sm"
+            >
+              Edit Complete Profile
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={onUpdate} className="space-y-8 max-h-[60vh] overflow-y-auto px-2 pr-4 custom-scrollbar text-left">
+            <div className="space-y-4">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#534ab7] mb-3">Basic Details</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Full Name</label>
+                  <input required type="text" value={editForm.fullName} onChange={(e) => setEditForm({...editForm, fullName: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#534ab7]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Phone</label>
+                  <input type="text" value={editForm.phoneNumber} onChange={(e) => setEditForm({...editForm, phoneNumber: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#534ab7]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">University</label>
+                  <input type="text" value={editForm.schoolName} onChange={(e) => setEditForm({...editForm, schoolName: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#534ab7]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 pt-6 border-t border-black/5">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#534ab7] mb-3">KYC Info</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Matric Number</label>
+                  <input type="text" value={editForm.matricNumber} onChange={(e) => setEditForm({...editForm, matricNumber: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#534ab7]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">11-Digit BVN</label>
+                  <input type="text" value={editForm.bvn} onChange={(e) => setEditForm({...editForm, bvn: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#534ab7]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Bank Name</label>
+                  <input type="text" value={editForm.bankName} onChange={(e) => setEditForm({...editForm, bankName: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#534ab7]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Account Number</label>
+                  <input type="text" value={editForm.accountNumber} onChange={(e) => setEditForm({...editForm, accountNumber: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#534ab7]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Residential Address</label>
+                  <input type="text" value={editForm.address} onChange={(e) => setEditForm({...editForm, address: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#534ab7]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">State</label>
+                  <input type="text" value={editForm.state} onChange={(e) => setEditForm({...editForm, state: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#534ab7]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">NIN (11 Digits)</label>
+                  <input type="text" maxLength={11} value={editForm.nationalIdNumber} onChange={(e) => setEditForm({...editForm, nationalIdNumber: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#534ab7]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Date of Birth</label>
+                  <input type="date" value={editForm.dateOfBirth} onChange={(e) => setEditForm({...editForm, dateOfBirth: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#534ab7]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 pt-6 border-t border-black/5">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#534ab7] mb-3">Academic Performance</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2 sm:col-span-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Department & Course of Study</label>
+                  <input type="text" value={editForm.courseOfStudy} onChange={(e) => setEditForm({...editForm, courseOfStudy: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#534ab7]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Year of Entry</label>
+                  <input type="text" value={editForm.schoolEntryYear} onChange={(e) => setEditForm({...editForm, schoolEntryYear: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#534ab7]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Course Duration</label>
+                  <input type="text" value={editForm.courseDuration} onChange={(e) => setEditForm({...editForm, courseDuration: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#534ab7]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Graduation Year</label>
+                  <input type="text" value={editForm.graduationYear} onChange={(e) => setEditForm({...editForm, graduationYear: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#534ab7]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Semester GPA</label>
+                  <input type="number" step="0.01" min="0" max="5" value={editForm.semesterGpa} onChange={(e) => setEditForm({...editForm, semesterGpa: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#534ab7]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">CGPA</label>
+                  <input type="number" step="0.01" min="0" max="5" value={editForm.cgpa} onChange={(e) => setEditForm({...editForm, cgpa: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#534ab7]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 pt-6 border-t border-black/5">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#534ab7] mb-3">Professional Socials</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Instagram</label>
+                  <input type="text" value={editForm.instagram} onChange={(e) => setEditForm({...editForm, instagram: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#534ab7]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">X/Twitter</label>
+                  <input type="text" value={editForm.twitter} onChange={(e) => setEditForm({...editForm, twitter: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#534ab7]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Facebook</label>
+                  <input type="text" value={editForm.facebook} onChange={(e) => setEditForm({...editForm, facebook: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-[#534ab7]/10 outline-none text-sm font-bold text-slate-800" />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-4 pt-8 sticky bottom-0 bg-white pb-4">
+              <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
+                type="button"
+                onClick={() => setIsEditing(false)}
+                className="flex-[1] py-4 border-2 border-slate-200 text-slate-500 font-black tracking-widest uppercase text-[10px] rounded-2xl hover:bg-slate-50 transition-all"
+              >
+                Discard
+              </button>
+              <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
+                type="submit"
+                disabled={isSaving}
+                className="flex-[2] py-4 bg-[#534ab7] text-white font-black tracking-widest uppercase text-[10px] rounded-2xl shadow-xl shadow-[#534ab7]/30 hover:-translate-y-1 transition-all disabled:opacity-50 disabled:-translate-y-0"
+              >
+                {isSaving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto"></div> : "Apply Changes"}
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );
@@ -791,7 +1247,7 @@ const VentureModal = ({ venture, onClose, formatNaira }: any) => {
 
         <div className="p-8 pt-0 flex gap-3">
            <button onClick={onClose} className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest border border-slate-200 rounded-2xl bg-white hover:bg-slate-50 transition-all">Go Back</button>
-           <button className="flex-[2] py-4 text-[10px] font-black uppercase tracking-widest bg-[#534ab7] text-white rounded-2xl shadow-xl shadow-[#534ab7]/30">Fund Peer Now</button>
+           <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} className="flex-[2] py-4 text-[10px] font-black uppercase tracking-widest bg-[#534ab7] text-white rounded-2xl shadow-xl shadow-[#534ab7]/30">Fund Peer Now</button>
         </div>
       </motion.div>
     </motion.div>
@@ -821,7 +1277,7 @@ const StudentKYC = ({
               <p className="text-orange-700/60 text-xs font-bold uppercase tracking-[0.1em]">Verification required to trade ventures</p>
             </div>
           </div>
-          <button 
+          <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
             onClick={() => setShowForm(true)}
             className="w-full md:w-auto bg-orange-600 hover:bg-orange-700 text-white font-black text-[11px] uppercase tracking-[0.2em] px-10 py-5 rounded-2xl shadow-xl shadow-orange-900/10 transition-all hover:-translate-y-1"
           >
@@ -838,7 +1294,7 @@ const StudentKYC = ({
         >
           <div className="absolute top-0 right-0 w-64 h-64 bg-violet-50 rounded-full blur-3xl -mr-32 -mt-32 opacity-50 pointer-events-none"></div>
           
-          <button 
+          <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
             onClick={() => setShowForm(false)} 
             className="absolute top-8 right-8 text-slate-300 hover:bg-slate-50 p-2 rounded-full transition-all z-10"
           >
@@ -852,40 +1308,49 @@ const StudentKYC = ({
           
           <form onSubmit={onSubmit} className="space-y-10 relative z-10 text-left">
             <div className="space-y-6">
-              <h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Personal & Academic</h4>
+              <h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Personal Details</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-slate-500 ml-1 tracking-widest">Phone Number</label>
                   <input required type="tel" value={formData.phoneNumber} onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})} placeholder="081 2345 6789" className="w-full px-6 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:outline-none focus:ring-4 focus:ring-violet-500/5 text-sm font-bold" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase text-slate-500 ml-1 tracking-widest">Matric Number</label>
-                  <input required type="text" value={formData.matricNumber} onChange={(e) => setFormData({...formData, matricNumber: e.target.value})} placeholder="CSC/2021/045" className="w-full px-6 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:outline-none focus:ring-4 focus:ring-violet-500/5 text-sm font-bold" />
+                  <label className="text-[10px] font-black uppercase text-slate-500 ml-1 tracking-widest">Date of Birth</label>
+                  <input required type="date" value={formData.dateOfBirth} onChange={(e) => setFormData({...formData, dateOfBirth: e.target.value})} className="w-full px-6 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:outline-none focus:ring-4 focus:ring-violet-500/5 text-sm font-bold" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-slate-500 ml-1 tracking-widest">11-Digit BVN</label>
                   <input required type="text" maxLength={11} value={formData.bvn} onChange={(e) => setFormData({...formData, bvn: e.target.value})} placeholder="00011122233" className="w-full px-6 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:outline-none focus:ring-4 focus:ring-violet-500/5 text-sm font-bold" />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase text-slate-500 ml-1 tracking-widest">Banking Profile</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <input required type="text" value={formData.bankName} onChange={(e) => setFormData({...formData, bankName: e.target.value})} placeholder="Bank" className="w-full px-4 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-violet-500/10 text-xs font-bold" />
-                    <input required type="text" value={formData.accountNumber} onChange={(e) => setFormData({...formData, accountNumber: e.target.value})} placeholder="Account" className="w-full px-4 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-violet-500/10 text-xs font-bold" />
-                  </div>
-                </div>
               </div>
             </div>
 
             <div className="space-y-6">
-              <h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Academic Standing</h4>
-              <div className="grid grid-cols-2 gap-6">
+              <h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Academic Verification</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2 sm:col-span-2">
+                  <label className="text-[10px] font-black uppercase text-slate-500 ml-1 tracking-widest">Department & Course of Study</label>
+                  <input required type="text" value={formData.courseOfStudy} onChange={(e) => setFormData({...formData, courseOfStudy: e.target.value})} placeholder="Faculty of Science - Computer Science" className="w-full px-6 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:outline-none focus:ring-4 focus:ring-violet-500/5 text-sm font-bold" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-slate-500 ml-1 tracking-widest">Matric Number</label>
+                  <input required type="text" value={formData.matricNumber} onChange={(e) => setFormData({...formData, matricNumber: e.target.value})} placeholder="CSC/2021/045" className="w-full px-6 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:outline-none focus:ring-4 focus:ring-violet-500/5 text-sm font-bold" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-slate-500 ml-1 tracking-widest">Year of Entry</label>
+                  <input required type="text" value={formData.schoolEntryYear} onChange={(e) => setFormData({...formData, schoolEntryYear: e.target.value})} placeholder="2021" className="w-full px-6 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:outline-none focus:ring-4 focus:ring-violet-500/5 text-sm font-bold" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-slate-500 ml-1 tracking-widest">Course Duration</label>
+                  <input required type="text" value={formData.courseDuration} onChange={(e) => setFormData({...formData, courseDuration: e.target.value})} placeholder="4 Years" className="w-full px-6 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:outline-none focus:ring-4 focus:ring-violet-500/5 text-sm font-bold" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-slate-500 ml-1 tracking-widest">Expected Graduation</label>
+                  <input required type="text" value={formData.graduationYear} onChange={(e) => setFormData({...formData, graduationYear: e.target.value})} placeholder="2025" className="w-full px-6 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:outline-none focus:ring-4 focus:ring-violet-500/5 text-sm font-bold" />
+                </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-slate-500 ml-1 tracking-widest">Cumulative CGPA</label>
                   <input required type="number" step="0.01" min="0" max="5" value={formData.cgpa} onChange={(e) => setFormData({...formData, cgpa: e.target.value})} placeholder="e.g. 4.5" className="w-full px-6 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:outline-none focus:ring-4 focus:ring-violet-500/5 text-sm font-bold" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase text-slate-500 ml-1 tracking-widest">Date of Birth</label>
-                  <input required type="date" value={formData.dateOfBirth} onChange={(e) => setFormData({...formData, dateOfBirth: e.target.value})} className="w-full px-6 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:outline-none focus:ring-4 focus:ring-violet-500/5 text-sm font-bold" />
                 </div>
               </div>
             </div>
@@ -936,6 +1401,7 @@ const StudentKYC = ({
                 { label: "Phone & Mobile Security", stat: profile?.phone_number ? "Verified" : "Required", confirmed: !!profile?.phone_number },
                 { label: "BVN Integration", stat: profile?.bvn ? "Submitted" : "Required", confirmed: !!profile?.bvn },
                 { label: "Academic Standing (CGPA)", stat: profile?.cgpa ? "Verified" : "Pending", confirmed: !!profile?.cgpa },
+                { label: "Graduation Details", stat: profile?.graduation_year ? "Verified" : "Pending", confirmed: !!profile?.graduation_year },
                 { label: "Bank Account Settlement", stat: profile?.bank_account_number ? "Linked" : "Required", confirmed: !!profile?.bank_account_number },
                 { label: "Social Media Identity", stat: (profile?.instagram_handle || profile?.twitter_handle) ? "Linked" : "Pending", confirmed: (!!profile?.instagram_handle || !!profile?.twitter_handle) }
               ].map((row, i) => (
@@ -954,7 +1420,7 @@ const StudentKYC = ({
             </div>
             
             {profile?.kyc_status !== 'verified' && (
-              <button 
+              <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
                 onClick={() => setShowForm(true)}
                 className="w-full py-6 mt-10 border-4 border-dashed border-violet-100 text-[#534ab7] font-black text-[11px] uppercase tracking-[0.2em] rounded-3xl hover:bg-violet-50 transition-all font-sans"
               >
@@ -964,89 +1430,6 @@ const StudentKYC = ({
           </div>
         </motion.div>
       )}
-    </div>
-  );
-};
-
-const StudentGuide = ({ setActiveTab }: { setActiveTab: (tab: StudentTab) => void }) => {
-  const steps = [
-    {
-      num: "1",
-      title: "Create Account",
-      desc: "Sign up and complete identity verification (KYC) to ensure platform security.",
-      icon: <User className="w-6 h-6" />,
-      color: "bg-blue-500"
-    },
-    {
-      num: "2",
-      title: "Browse Ventures",
-      desc: "Explore approved student businesses filtered by category, risk level, and return rate.",
-      icon: <Search className="w-6 h-6" />,
-      color: "bg-indigo-500"
-    },
-    {
-      num: "3",
-      title: "Invest & Track",
-      desc: "Invest any amount and monitor your portfolio with real-time updates and analytics.",
-      icon: <TrendingUp className="w-6 h-6" />,
-      color: "bg-violet-500"
-    },
-    {
-      num: "4",
-      title: "Earn Returns",
-      desc: "Receive your principal plus fixed returns (up to 15%) when loans mature.",
-      icon: <Wallet className="w-6 h-6" />,
-      color: "bg-emerald-500"
-    }
-  ];
-
-  return (
-    <div className="max-w-4xl mx-auto">
-      <div className="bg-white border border-black/5 rounded-[2.5rem] p-8 md:p-12 shadow-sm relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-violet-50 rounded-full blur-3xl -mr-20 -mt-20"></div>
-        
-        <div className="relative z-10">
-          <h2 className="text-3xl font-black text-slate-800 mb-4 tracking-tight">How to Invest in Peer Ventures</h2>
-          <p className="text-slate-500 font-medium mb-12 max-w-2xl leading-relaxed">
-            Welcome to the Student Investor Portal. Empower student entrepreneurs while growing your capital. Follow these steps to get started.
-          </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {steps.map((step, i) => (
-              <motion.div 
-                key={i}
-                whileHover={{ y: -5 }}
-                className="flex gap-6 p-6 rounded-3xl bg-slate-50/50 border border-black/5 hover:bg-white hover:shadow-xl hover:shadow-violet-500/5 transition-all"
-              >
-                <div className={`w-14 h-14 rounded-2xl ${step.color} text-white flex items-center justify-center text-xl font-black shadow-lg flex-shrink-0`}>
-                  {step.num}
-                </div>
-                <div>
-                  <h3 className="text-lg font-black text-slate-800 mb-1">{step.title}</h3>
-                  <p className="text-slate-500 text-[13px] font-bold leading-relaxed">{step.desc}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-          
-          <div className="mt-12 pt-8 border-t border-black/5 flex flex-col sm:flex-row items-center justify-end gap-4">
-            <button 
-              onClick={() => setActiveTab("kyc")}
-              className="w-full sm:w-auto px-8 py-4 bg-orange-500 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-orange-500/20 hover:-translate-y-1 transition-all flex items-center justify-center gap-2"
-            >
-              <ShieldAlert size={18} />
-              Complete Verification
-            </button>
-            <button 
-              onClick={() => setActiveTab("ventures")}
-              className="w-full sm:w-auto px-8 py-4 bg-[#534ab7] text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-violet-500/20 hover:-translate-y-1 transition-all flex items-center justify-center gap-2"
-            >
-              <TrendingUp size={18} />
-              Start Investing
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

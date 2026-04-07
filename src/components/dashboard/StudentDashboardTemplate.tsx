@@ -23,7 +23,8 @@ import {
   LogOut,
   CreditCard,
   Building,
-  ShieldAlert
+  ShieldAlert,
+  ArrowRight
 } from "lucide-react";
 import {
   Chart as ChartJS,
@@ -76,7 +77,11 @@ const StudentDashboardTemplate = () => {
     address: "",
     state: "",
     dateOfBirth: "",
-    nationalIdNumber: ""
+    nationalIdNumber: "",
+    schoolEntryYear: "",
+    courseDuration: "",
+    graduationYear: "",
+    courseOfStudy: ""
   });
   const [studentIdFile, setStudentIdFile] = useState<File | null>(null);
   const [businessDocFile, setBusinessDocFile] = useState<File | null>(null);
@@ -100,7 +105,11 @@ const StudentDashboardTemplate = () => {
     twitter: "",
     facebook: "",
     dateOfBirth: "",
-    nationalIdNumber: ""
+    nationalIdNumber: "",
+    schoolEntryYear: "",
+    courseDuration: "",
+    graduationYear: "",
+    courseOfStudy: ""
   });
   const [isSavingProfile, setIsSavingProfile] = useState(false);
 
@@ -121,7 +130,11 @@ const StudentDashboardTemplate = () => {
       twitter: profile?.twitter_handle || "",
       facebook: profile?.facebook_handle || "",
       dateOfBirth: profile?.date_of_birth || "",
-      nationalIdNumber: profile?.national_id_number || ""
+      nationalIdNumber: profile?.national_id_number || "",
+      schoolEntryYear: profile?.school_entry_year || "",
+      courseDuration: profile?.course_duration || "",
+      graduationYear: profile?.graduation_year || "",
+      courseOfStudy: profile?.course_of_study || ""
     });
     setIsEditingProfile(true);
   };
@@ -152,6 +165,10 @@ const StudentDashboardTemplate = () => {
           facebook_handle: editForm.facebook,
           date_of_birth: editForm.dateOfBirth,
           national_id_number: editForm.nationalIdNumber,
+          school_entry_year: editForm.schoolEntryYear,
+          course_duration: editForm.courseDuration,
+          graduation_year: editForm.graduationYear,
+          course_of_study: editForm.courseOfStudy,
           updated_at: new Date().toISOString()
         })
         .eq('id', userId);
@@ -175,6 +192,10 @@ const StudentDashboardTemplate = () => {
         profile.facebook_handle = editForm.facebook;
         profile.date_of_birth = editForm.dateOfBirth;
         profile.national_id_number = editForm.nationalIdNumber;
+        profile.school_entry_year = editForm.schoolEntryYear;
+        profile.course_duration = editForm.courseDuration;
+        profile.graduation_year = editForm.graduationYear;
+        profile.course_of_study = editForm.courseOfStudy;
       }
 
       setIsEditingProfile(false);
@@ -273,6 +294,10 @@ const StudentDashboardTemplate = () => {
         state: kycForm.state || null,
         date_of_birth: kycForm.dateOfBirth || null,
         national_id_number: kycForm.nationalIdNumber || null,
+        school_entry_year: kycForm.schoolEntryYear || null,
+        course_duration: kycForm.courseDuration || null,
+        graduation_year: kycForm.graduationYear || null,
+        course_of_study: kycForm.courseOfStudy || null,
       };
       
       console.log("KYC Upsert payload:", updatePayload);
@@ -309,6 +334,10 @@ const StudentDashboardTemplate = () => {
         profile.state = kycForm.state || profile.state;
         profile.date_of_birth = kycForm.dateOfBirth || profile.date_of_birth;
         profile.national_id_number = kycForm.nationalIdNumber || profile.national_id_number;
+        profile.school_entry_year = kycForm.schoolEntryYear || profile.school_entry_year;
+        profile.course_duration = kycForm.courseDuration || profile.course_duration;
+        profile.graduation_year = kycForm.graduationYear || profile.graduation_year;
+        profile.course_of_study = kycForm.courseOfStudy || profile.course_of_study;
       }
       setShowKycForm(false);
       toast({ title: "Verification Submitted", description: "Your documents are now under review." });
@@ -386,7 +415,7 @@ const StudentDashboardTemplate = () => {
 
   const contentVariants = {
     hidden: { opacity: 0, y: 15 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut", staggerChildren: 0.05 } },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" as const, staggerChildren: 0.05 } },
     exit: { opacity: 0, y: -10, transition: { duration: 0.2 } }
   };
 
@@ -419,14 +448,6 @@ const StudentDashboardTemplate = () => {
           </div>
 
           <div className="flex items-center gap-4 text-sm relative z-30">
-            <button 
-              onClick={() => setActiveTab("credit")} 
-              className="hidden md:flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-widest shadow-md transition-all"
-            >
-              <ShieldAlert size={14} />
-              <span>Complete KYC</span>
-            </button>
-
             <div className="hidden sm:flex items-center gap-2 border-2 border-white/20 bg-white/10 backdrop-blur-md rounded-full px-5 py-2 text-[13px] font-bold whitespace-nowrap shadow-sm hover:bg-white/20 transition-all cursor-pointer">
               <span>🚀</span> Student Entrepreneur
             </div>
@@ -436,7 +457,7 @@ const StudentDashboardTemplate = () => {
             <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center font-black text-[#1a56db] shadow-md transform hover:scale-105 transition-all text-lg border-2 border-blue-200">
               {!displayName && loading ? ".." : (displayName ? displayName.substring(0, 2).toUpperCase() : "SB")}
             </div>
-            <button 
+            <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
               onClick={handleLogout} 
               className="ml-1 w-10 h-10 rounded-full bg-white/10 hover:bg-red-500 hover:text-white text-white flex items-center justify-center transition-all border border-white/20"
               title="Logout"
@@ -449,7 +470,7 @@ const StudentDashboardTemplate = () => {
         {/* Tab Navigation */}
         <nav className="bg-white border-b-2 border-blue-100 flex items-center gap-6 px-6 md:px-12 overflow-x-auto no-scrollbar w-full shadow-sm relative z-20">
           {tabs.map((tab) => (
-            <button
+            <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`py-5 text-[13px] font-extrabold uppercase tracking-wide whitespace-nowrap transition-all relative ${
@@ -591,52 +612,9 @@ const StudentDashboardTemplate = () => {
                 </>
               )}
 
-              {/* TAB: HOW IT WORKS (NEW) */}
+              {/* TAB: GUIDE */}
               {activeTab === "how-it-works" && (
-                <motion.div variants={itemVariants} className="max-w-4xl mx-auto">
-                  <div className="bg-white border border-border/60 rounded-3xl p-8 sm:p-10 shadow-md relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-[#e8f0fe]/50 rounded-full blur-3xl -mr-20 -mt-20"></div>
-                    
-                    <div className="relative z-10">
-                      <h2 className="text-3xl font-display font-bold text-foreground mb-4">Ready to grow your venture?</h2>
-                      <p className="text-base text-muted-foreground font-medium mb-10 max-w-2xl leading-relaxed">
-                        Welcome to your Entrepreneur Dashboard. This highly secure platform allows verified student business owners to request seed funding directly from active local Investors.
-                      </p>
-                      
-                      <div className="space-y-6">
-                        <motion.div whileHover={{ x: 5 }} className="flex gap-5 p-5 rounded-2xl hover:bg-muted/30 transition-colors border border-transparent hover:border-border/50">
-                          <div className="w-12 h-12 rounded-2xl bg-[#1a56db] text-white flex items-center justify-center text-lg font-bold shadow-lg flex-shrink-0">1</div>
-                          <div>
-                            <h3 className="text-lg font-bold text-foreground">Pass KYC Verification</h3>
-                            <p className="mt-1.5 text-muted-foreground text-sm font-medium leading-relaxed">Before asking for a loan, navigate to the "Credit & KYC" tab to upload your student ID and verify your Matric Number. Your KYC completion directly boosts your max funding limit.</p>
-                          </div>
-                        </motion.div>
-                        
-                        <motion.div whileHover={{ x: 5 }} className="flex gap-5 p-5 rounded-2xl hover:bg-muted/30 transition-colors border border-transparent hover:border-border/50">
-                          <div className="w-12 h-12 rounded-2xl bg-[#1a7a4a] text-white flex items-center justify-center text-lg font-bold shadow-lg flex-shrink-0">2</div>
-                          <div>
-                            <h3 className="text-lg font-bold text-foreground">Apply for a Loan</h3>
-                            <p className="mt-1.5 text-muted-foreground text-sm font-medium leading-relaxed">Head over to the "Loans" tab, hit pitch, and set your funding goal. Be extremely descriptive! Investors will actively review your requirements and decide to back you.</p>
-                          </div>
-                        </motion.div>
-                        
-                        <motion.div whileHover={{ x: 5 }} className="flex gap-5 p-5 rounded-2xl hover:bg-muted/30 transition-colors border border-transparent hover:border-border/50">
-                          <div className="w-12 h-12 rounded-2xl bg-[#d97706] text-white flex items-center justify-center text-lg font-bold shadow-lg flex-shrink-0">3</div>
-                          <div>
-                            <h3 className="text-lg font-bold text-foreground">Repay and Skyrocket your Credit</h3>
-                            <p className="mt-1.5 text-muted-foreground text-sm font-medium leading-relaxed">Once funded, watch the "Repayments" tab closely. A fantastic repayment schedule proves your character—raising your internal 850 Credit Score instantly, making massive future loans possible.</p>
-                          </div>
-                        </motion.div>
-                      </div>
-                      
-                      <div className="mt-10 pt-8 border-t border-border flex justify-end">
-                        <button onClick={() => setActiveTab("credit")} className="bg-[#1a56db] text-white px-8 py-3.5 rounded-full font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center gap-2">
-                          Start my KYC <ChevronRight className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
+                <EntrepreneurGuide setActiveTab={setActiveTab} />
               )}
 
               {/* TAB: LOANS */}
@@ -696,7 +674,7 @@ const StudentDashboardTemplate = () => {
                   
                   <motion.div variants={itemVariants} className="bg-white border border-border/60 rounded-2xl p-8 text-center shadow-sm">
                     <p className="text-sm text-muted-foreground font-medium mb-4">Need more funding for your business?</p>
-                    <button className="bg-[#1a56db] text-white font-bold py-2.5 px-6 rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                    <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} className="bg-[#1a56db] text-white font-bold py-2.5 px-6 rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
                       Apply for a new loan
                     </button>
                   </motion.div>
@@ -887,10 +865,26 @@ const StudentDashboardTemplate = () => {
 
                         {/* Section 2: Academic Performance */}
                         <div>
-                          <h4 className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground mb-3">Academic Performance</h4>
-                          <div className="grid grid-cols-2 gap-4">
+                          <h4 className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground mb-3">Academic Details</h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                              <label className="text-sm font-bold text-foreground">Semester GPA</label>
+                              <label className="text-sm font-bold text-foreground">Department & Course of Study</label>
+                              <input required disabled={isSubmittingKyc} type="text" value={kycForm.courseOfStudy} onChange={(e) => setKycForm({...kycForm, courseOfStudy: e.target.value})} placeholder="e.g. Faculty of Engineering - Electrical" className="w-full px-4 py-2.5 rounded-xl border border-border bg-muted/20 focus:outline-none focus:ring-2 focus:ring-[#1a56db]/50 text-sm" />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-sm font-bold text-foreground">Year of Entry</label>
+                              <input required disabled={isSubmittingKyc} type="text" value={kycForm.schoolEntryYear} onChange={(e) => setKycForm({...kycForm, schoolEntryYear: e.target.value})} placeholder="e.g. 2021" className="w-full px-4 py-2.5 rounded-xl border border-border bg-muted/20 focus:outline-none focus:ring-2 focus:ring-[#1a56db]/50 text-sm" />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-sm font-bold text-foreground">Course Duration</label>
+                              <input required disabled={isSubmittingKyc} type="text" value={kycForm.courseDuration} onChange={(e) => setKycForm({...kycForm, courseDuration: e.target.value})} placeholder="e.g. 4 Years" className="w-full px-4 py-2.5 rounded-xl border border-border bg-muted/20 focus:outline-none focus:ring-2 focus:ring-[#1a56db]/50 text-sm" />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-sm font-bold text-foreground">Expected Graduation Year</label>
+                              <input required disabled={isSubmittingKyc} type="text" value={kycForm.graduationYear} onChange={(e) => setKycForm({...kycForm, graduationYear: e.target.value})} placeholder="e.g. 2025" className="w-full px-4 py-2.5 rounded-xl border border-border bg-muted/20 focus:outline-none focus:ring-2 focus:ring-[#1a56db]/50 text-sm" />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-sm font-bold text-foreground">Current Semester GPA</label>
                               <input required disabled={isSubmittingKyc} type="number" step="0.01" min="0" max="5" value={kycForm.semesterGpa} onChange={(e) => setKycForm({...kycForm, semesterGpa: e.target.value})} placeholder="e.g. 4.25" className="w-full px-4 py-2.5 rounded-xl border border-border bg-muted/20 focus:outline-none focus:ring-2 focus:ring-[#1a56db]/50 text-sm" />
                             </div>
                             <div className="space-y-2">
@@ -1140,8 +1134,24 @@ const StudentDashboardTemplate = () => {
                             <span className="text-foreground font-bold">{profile?.bank_name ? `${profile.bank_name} - ${profile.bank_account_number}` : "Pending"}</span>
                           </div>
                           <div className="flex justify-between py-2 text-sm">
+                            <span className="text-muted-foreground font-medium">Department & Course</span>
+                            <span className="text-foreground font-bold">{profile?.course_of_study || "Pending"}</span>
+                          </div>
+                          <div className="flex justify-between py-2 text-sm">
                             <span className="text-muted-foreground font-medium">Academic CGPA</span>
                             <span className="text-foreground font-bold">{profile?.cgpa || "N/A"}</span>
+                          </div>
+                          <div className="flex justify-between py-2 text-sm">
+                            <span className="text-muted-foreground font-medium">Year of Entry</span>
+                            <span className="text-foreground font-bold">{profile?.school_entry_year || "N/A"}</span>
+                          </div>
+                          <div className="flex justify-between py-2 text-sm">
+                            <span className="text-muted-foreground font-medium">Program Duration</span>
+                            <span className="text-foreground font-bold">{profile?.course_duration || "N/A"}</span>
+                          </div>
+                          <div className="flex justify-between py-2 text-sm">
+                            <span className="text-muted-foreground font-medium">Graduation Year</span>
+                            <span className="text-foreground font-bold text-[#1a7a4a]">{profile?.graduation_year || "N/A"}</span>
                           </div>
                         </div>
 
@@ -1155,7 +1165,7 @@ const StudentDashboardTemplate = () => {
                           </div>
                         </div>
 
-                        <button 
+                        <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
                           onClick={startEditing}
                           className="w-full py-2.5 mt-8 border-2 border-[#1a56db] text-[#1a56db] font-bold rounded-xl hover:bg-[#e8f0fe]/50 transition-all shadow-sm"
                         >
@@ -1223,6 +1233,22 @@ const StudentDashboardTemplate = () => {
                         <div className="space-y-4 pt-4 border-t border-border/40">
                           <h4 className="text-xs font-extrabold uppercase tracking-widest text-[#1a56db] mb-3">Academic Performance</h4>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-2 sm:col-span-2">
+                              <label className="text-[10px] font-bold uppercase text-muted-foreground">Department & Course of Study</label>
+                              <input type="text" value={editForm.courseOfStudy} onChange={(e) => setEditForm({...editForm, courseOfStudy: e.target.value})} className="w-full px-4 py-2.5 bg-muted/10 border rounded-xl focus:ring-2 focus:ring-[#1a56db]/50 outline-none text-sm" />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-[10px] font-bold uppercase text-muted-foreground">Year of Entry</label>
+                              <input type="text" value={editForm.schoolEntryYear} onChange={(e) => setEditForm({...editForm, schoolEntryYear: e.target.value})} className="w-full px-4 py-2.5 bg-muted/10 border rounded-xl focus:ring-2 focus:ring-[#1a56db]/50 outline-none text-sm" />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-[10px] font-bold uppercase text-muted-foreground">Course Duration</label>
+                              <input type="text" value={editForm.courseDuration} onChange={(e) => setEditForm({...editForm, courseDuration: e.target.value})} className="w-full px-4 py-2.5 bg-muted/10 border rounded-xl focus:ring-2 focus:ring-[#1a56db]/50 outline-none text-sm" />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-[10px] font-bold uppercase text-muted-foreground">Graduation Year</label>
+                              <input type="text" value={editForm.graduationYear} onChange={(e) => setEditForm({...editForm, graduationYear: e.target.value})} className="w-full px-4 py-2.5 bg-muted/10 border rounded-xl focus:ring-2 focus:ring-[#1a56db]/50 outline-none text-sm" />
+                            </div>
                             <div className="space-y-2">
                               <label className="text-[10px] font-bold uppercase text-muted-foreground">Semester GPA</label>
                               <input type="number" step="0.01" min="0" max="5" value={editForm.semesterGpa} onChange={(e) => setEditForm({...editForm, semesterGpa: e.target.value})} className="w-full px-4 py-2.5 bg-muted/10 border rounded-xl focus:ring-2 focus:ring-[#1a56db]/50 outline-none text-sm" />
@@ -1253,14 +1279,14 @@ const StudentDashboardTemplate = () => {
                         </div>
 
                         <div className="flex gap-4 pt-6 sticky bottom-0 bg-white pb-2">
-                          <button 
+                          <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
                             type="button"
                             onClick={() => setIsEditingProfile(false)}
                             className="flex-1 py-3 border-2 border-border text-muted-foreground font-bold rounded-xl hover:bg-muted/50 transition-all font-display text-xs"
                           >
                             Discard
                           </button>
-                          <button 
+                          <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
                             type="submit"
                             disabled={isSavingProfile}
                             className="flex-1 py-3 bg-[#1a56db] text-white font-bold rounded-xl shadow-lg border border-[#1a56db] hover:shadow-[#1a56db]/20 transition-all font-display text-xs disabled:opacity-50"
@@ -1281,5 +1307,140 @@ const StudentDashboardTemplate = () => {
     </div>
   );
 };
+
+// --- VIEWS ---
+
+const EntrepreneurGuide = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
+  const steps = [
+    {
+      emoji: "🛡️",
+      title: "Pass KYC Verification",
+      desc: "Upload your student ID and verify your Matric Number. High-trust profiles get funded 3x faster and unlock larger loan limits.",
+      cta: "Verify Account",
+      tab: "credit",
+      bg: "bg-blue-50",
+      border: "border-blue-100",
+      text: "text-blue-700",
+      btnBg: "bg-blue-600 hover:bg-blue-700",
+    },
+    {
+      emoji: "📊",
+      title: "Build Your Pitch",
+      desc: "Tell your business story. Use the 'Business' tab to show revenue, growth, and why investors should back your vision.",
+      cta: "Setup Business",
+      tab: "business",
+      bg: "bg-emerald-50",
+      border: "border-emerald-100",
+      text: "text-emerald-700",
+      btnBg: "bg-emerald-600 hover:bg-emerald-700",
+    },
+    {
+      emoji: "💰",
+      title: "Get Funded",
+      desc: "Request a peer loan. Investors will review your profile and fund your venture. Funds are disbursed instantly once backed.",
+      cta: "Request Loan",
+      tab: "loans",
+      bg: "bg-orange-50",
+      border: "border-orange-100",
+      text: "text-orange-700",
+      btnBg: "bg-orange-600 hover:bg-orange-700",
+    },
+    {
+      emoji: "💸",
+      title: "Scale & Repay",
+      desc: "Stay on track! Timely repayments skyrocket your Credit Score, making you eligible for ₦1,000,000+ scaling loans.",
+      cta: "View Schedule",
+      tab: "repayments",
+      bg: "bg-green-50",
+      border: "border-green-100",
+      text: "text-green-700",
+      btnBg: "bg-green-600 hover:bg-green-700",
+    },
+  ];
+
+  const faqs = [
+    {
+      q: "Who can see my business pitch?",
+      a: "Only verified Investors (Students, Alumni, and Community) on the StudentBIZ platform can see your venture details.",
+    },
+    {
+      q: "How is my Credit Score calculated?",
+      a: "It's based on your academic standing (CGPA), KYC status, and most importantly, your repayment consistency on previous loans.",
+    },
+    {
+      q: "What happens if I'm late on a payment?",
+      a: "Late payments lower your Credit Score and may restrict future funding. We encourage transparency — communicate with your investors via the dashboard.",
+    },
+    {
+      q: "When can I ask for more money?",
+      a: "As you repay and grow your revenue, the platform automatically raises your funding ceiling for your next business stage.",
+    },
+  ];
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-12">
+      {/* Hero */}
+      <div className="bg-gradient-to-br from-[#1a56db] to-blue-800 rounded-[2.5rem] p-10 text-white text-center relative overflow-hidden shadow-2xl shadow-blue-500/30">
+        <div className="absolute inset-0 opacity-10 pointer-events-none">
+          <Sparkles size={400} className="absolute -right-20 -top-20 text-white" />
+        </div>
+        <div className="relative z-10 text-left md:text-center">
+          <div className="text-5xl mb-4">🚀</div>
+          <h2 className="text-3xl font-black tracking-tight mb-3">Scale Your Vision</h2>
+          <p className="text-blue-50 font-medium text-lg max-w-xl mx-auto leading-relaxed">
+            Welcome, <strong className="text-white">Student Entrepreneur</strong>. This is your mission control. Follow these steps to unlock the capital you need to dominate the campus market.
+          </p>
+          <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
+            onClick={() => setActiveTab("loans")}
+            className="mt-8 bg-white text-blue-700 font-black text-xs uppercase tracking-[0.2em] px-10 py-4 rounded-full shadow-xl hover:-translate-y-1 transition-all"
+          >
+            Start Your Pitch Now
+          </button>
+        </div>
+      </div>
+
+      {/* Steps */}
+      <div>
+        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-6 px-1">Growth Roadmap — 4 Steps</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {steps.map((step, i) => (
+            <div key={i} className={`${step.bg} border-2 ${step.border} rounded-[2rem] p-7 flex flex-col gap-4 hover:-translate-y-1 transition-all shadow-sm text-left`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-2xl bg-white flex items-center justify-center text-xl shadow-sm`}>
+                  {step.emoji}
+                </div>
+                <span className={`text-[10px] font-black uppercase tracking-widest ${step.text}`}>Step {i + 1}</span>
+              </div>
+              <h4 className="text-base font-black text-slate-800 tracking-tight leading-tight">{step.title}</h4>
+              <p className="text-sm font-medium text-slate-600 leading-relaxed flex-1">{step.desc}</p>
+              <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
+                onClick={() => setActiveTab(step.tab)}
+                className={`self-start ${step.btnBg} text-white text-[10px] font-black uppercase tracking-[0.2em] px-6 py-3 rounded-xl transition-all shadow-sm flex items-center gap-2`}
+              >
+                {step.cta} <ArrowRight size={12} />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* FAQ */}
+      <div>
+        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-6 px-1">Entrepreneur Guide FAQ</h3>
+        <div className="space-y-3">
+          {faqs.map((faq, i) => (
+            <div key={i} className="bg-white border-2 border-slate-100 rounded-[1.5rem] p-6 shadow-sm text-left">
+              <h4 className="font-black text-slate-800 text-sm mb-2 flex items-center gap-2">
+                <span className="text-blue-500">Q.</span> {faq.q}
+              </h4>
+              <p className="text-sm font-medium text-slate-500 leading-relaxed pl-5">{faq.a}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 export default StudentDashboardTemplate;

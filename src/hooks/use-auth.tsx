@@ -29,6 +29,12 @@ interface Profile {
   instagram_handle?: string;
   twitter_handle?: string;
   facebook_handle?: string;
+  // New Fields
+  school_entry_year?: string;
+  course_duration?: string;
+  graduation_year?: string;
+  course_of_study?: string;
+  occupation?: string;
 }
 
 interface AuthContextType {
