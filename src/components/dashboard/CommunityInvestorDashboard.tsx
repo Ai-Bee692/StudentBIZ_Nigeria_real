@@ -33,7 +33,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/lib/supabase";
-import { useToast } from "@/hooks/use-toast";
+import { useToast, toast } from "@/hooks/use-toast";
 import myLogo from "@/assets/my-Logo.png";
 import {
   Chart as ChartJS,
@@ -385,7 +385,7 @@ const CommunityInvestorDashboard = () => {
               { id: "notifications", label: "Notifications" },
               { id: "profile", label: "Profile" },
             ].map((tab) => (
-              <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
+              <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as CommunityTab)}
                 className={`py-5 text-[13px] font-extrabold uppercase tracking-wide whitespace-nowrap transition-all relative ${
@@ -584,7 +584,7 @@ const CommunityGuide = ({
             are more than just a backer. You are building the next generation of
             Nigerian leaders by funding their student ventures.
           </p>
-          <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
+          <button
             onClick={() => setActiveTab("ventures")}
             className="mt-8 bg-white text-emerald-800 font-black text-xs uppercase tracking-[0.2em] px-10 py-4 rounded-full shadow-xl hover:-translate-y-1 transition-all"
           >
@@ -622,7 +622,7 @@ const CommunityGuide = ({
               <p className="text-sm font-medium text-slate-600 leading-relaxed flex-1">
                 {step.desc}
               </p>
-              <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
+              <button
                 onClick={() => setActiveTab(step.tab)}
                 className={`self-start ${step.btnBg} text-white text-[10px] font-black uppercase tracking-[0.2em] px-6 py-3 rounded-xl transition-all shadow-sm flex items-center gap-2`}
               >
@@ -718,7 +718,7 @@ const CommunityOverview = ({ formatNaira, profile, setActiveTab }: any) => {
               </p>
             </div>
           </div>
-          <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
+          <button
             onClick={() => setActiveTab("kyc")}
             className="relative z-10 bg-[#1a7a4a] text-white border-0 px-8 py-3.5 rounded-full font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-green-950/20 hover:bg-green-700 transition-all font-sans"
           >
@@ -1209,7 +1209,7 @@ const CommunityVentures = ({ formatNaira, onSelect }: any) => {
             </div>
 
             <div className="mt-auto grid grid-cols-2 gap-3">
-              <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
+              <button
                 onClick={() => onSelect(v)}
                 className="py-3.5 bg-white border-2 border-slate-200 text-[#1a7a4a] font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-slate-50 transition-colors"
               >
@@ -1417,7 +1417,7 @@ const CommunityProfile = ({
               </div>
             </div>
 
-            <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
+            <button
               onClick={startEditing}
               className="w-full py-4 mt-8 border-2 border-[#1a7a4a] text-[#1a7a4a] font-black text-[11px] uppercase tracking-[0.2em] rounded-2xl hover:bg-emerald-50 transition-all shadow-sm"
             >
@@ -1631,14 +1631,14 @@ const CommunityProfile = ({
             </div>
 
             <div className="flex gap-4 pt-8 sticky bottom-0 bg-white pb-4">
-              <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
+              <button
                 type="button"
                 onClick={() => setIsEditing(false)}
                 className="flex-[1] py-4 border-2 border-slate-200 text-slate-500 font-black tracking-widest uppercase text-[10px] rounded-2xl hover:bg-slate-50 transition-all"
               >
                 Discard
               </button>
-              <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
+              <button
                 type="submit"
                 disabled={isSaving}
                 className="flex-[2] py-4 bg-[#1a7a4a] text-white font-black tracking-widest uppercase text-[10px] rounded-2xl shadow-xl shadow-green-900/20 hover:-translate-y-1 transition-all disabled:opacity-50 disabled:-translate-y-0"
@@ -1718,7 +1718,7 @@ const TrustProfileModal = ({ venture, onClose, formatNaira }: any) => {
         animate={{ scale: 1, y: 0 }}
         className="bg-[#f3f6fb] w-full max-w-3xl rounded-[2.5rem] shadow-2xl relative my-auto border-4 border-white"
       >
-        <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
+        <button
           onClick={onClose}
           className="absolute top-4 left-4 z-10 bg-white px-4 py-2 rounded-xl shadow-md text-xs font-black uppercase tracking-widest flex items-center gap-2 hover:bg-slate-100 transition-colors"
         >
@@ -1927,7 +1927,7 @@ const TrustProfileModal = ({ venture, onClose, formatNaira }: any) => {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
+            <button
               onClick={onClose}
               className="flex-1 py-4.5 text-xs font-black uppercase tracking-widest bg-white border-2 border-slate-200 rounded-2xl hover:bg-slate-50 transition-colors shadow-sm"
             >
@@ -1974,7 +1974,7 @@ const CommunityKYC = ({
               </p>
             </div>
           </div>
-          <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
+          <button
             onClick={() => setShowForm(true)}
             className="w-full md:w-auto bg-[#1a7a4a] hover:bg-green-700 text-white font-black text-[11px] uppercase tracking-[0.2em] px-10 py-5 rounded-2xl shadow-xl shadow-green-950/20 transition-all hover:-translate-y-1"
           >
@@ -1991,7 +1991,7 @@ const CommunityKYC = ({
         >
           <div className="absolute top-0 right-0 w-64 h-64 bg-green-50 rounded-full blur-3xl -mr-32 -mt-32 opacity-50 pointer-events-none"></div>
 
-          <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
+          <button
             onClick={() => setShowForm(false)}
             className="absolute top-8 right-8 text-slate-300 hover:bg-slate-50 p-2 rounded-full transition-all z-10"
           >
@@ -2252,7 +2252,7 @@ const CommunityKYC = ({
             </div>
 
             {profile?.kyc_status !== "verified" && (
-              <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
+              <button
                 onClick={() => setShowForm(true)}
                 className="w-full py-6 mt-10 border-4 border-dashed border-emerald-50 text-[#1a7a4a] font-black text-[11px] uppercase tracking-[0.2em] rounded-3xl hover:bg-emerald-50 transition-all font-sans"
               >
