@@ -457,7 +457,7 @@ const StudentDashboardTemplate = () => {
             <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center font-black text-[#1a56db] shadow-md transform hover:scale-105 transition-all text-lg border-2 border-blue-200">
               {!displayName && loading ? ".." : (displayName ? displayName.substring(0, 2).toUpperCase() : "SB")}
             </div>
-            <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
+            <button 
               onClick={handleLogout} 
               className="ml-1 w-10 h-10 rounded-full bg-white/10 hover:bg-red-500 hover:text-white text-white flex items-center justify-center transition-all border border-white/20"
               title="Logout"
@@ -470,7 +470,7 @@ const StudentDashboardTemplate = () => {
         {/* Tab Navigation */}
         <nav className="bg-white border-b-2 border-blue-100 flex items-center gap-6 px-6 md:px-12 overflow-x-auto no-scrollbar w-full shadow-sm relative z-20">
           {tabs.map((tab) => (
-            <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
+            <button 
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`py-5 text-[13px] font-extrabold uppercase tracking-wide whitespace-nowrap transition-all relative ${
@@ -1165,7 +1165,7 @@ const StudentDashboardTemplate = () => {
                           </div>
                         </div>
 
-                        <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
+                        <button 
                           onClick={startEditing}
                           className="w-full py-2.5 mt-8 border-2 border-[#1a56db] text-[#1a56db] font-bold rounded-xl hover:bg-[#e8f0fe]/50 transition-all shadow-sm"
                         >
@@ -1279,7 +1279,7 @@ const StudentDashboardTemplate = () => {
                         </div>
 
                         <div className="flex gap-4 pt-6 sticky bottom-0 bg-white pb-2">
-                          <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
+                          <button 
                             type="button"
                             onClick={() => setIsEditingProfile(false)}
                             className="flex-1 py-3 border-2 border-border text-muted-foreground font-bold rounded-xl hover:bg-muted/50 transition-all font-display text-xs"
@@ -1311,6 +1311,7 @@ const StudentDashboardTemplate = () => {
 // --- VIEWS ---
 
 const EntrepreneurGuide = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
+  const { toast } = useToast();
   const steps = [
     {
       emoji: "🛡️",
@@ -1390,7 +1391,7 @@ const EntrepreneurGuide = ({ setActiveTab }: { setActiveTab: (tab: string) => vo
           <p className="text-blue-50 font-medium text-lg max-w-xl mx-auto leading-relaxed">
             Welcome, <strong className="text-white">Student Entrepreneur</strong>. This is your mission control. Follow these steps to unlock the capital you need to dominate the campus market.
           </p>
-          <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
+          <button 
             onClick={() => setActiveTab("loans")}
             className="mt-8 bg-white text-blue-700 font-black text-xs uppercase tracking-[0.2em] px-10 py-4 rounded-full shadow-xl hover:-translate-y-1 transition-all"
           >
@@ -1413,7 +1414,7 @@ const EntrepreneurGuide = ({ setActiveTab }: { setActiveTab: (tab: string) => vo
               </div>
               <h4 className="text-base font-black text-slate-800 tracking-tight leading-tight">{step.title}</h4>
               <p className="text-sm font-medium text-slate-600 leading-relaxed flex-1">{step.desc}</p>
-              <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
+              <button 
                 onClick={() => setActiveTab(step.tab)}
                 className={`self-start ${step.btnBg} text-white text-[10px] font-black uppercase tracking-[0.2em] px-6 py-3 rounded-xl transition-all shadow-sm flex items-center gap-2`}
               >

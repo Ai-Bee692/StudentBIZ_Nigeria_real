@@ -383,7 +383,7 @@ const StudentInvestorDashboard = () => {
               { id: "notifications", label: "Updates 🔔" },
               { id: "profile", label: "My Vibe 👤" }
             ].map((tab) => (
-              <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
+              <button 
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as StudentTab)}
                 className={`py-5 text-[13px] font-extrabold uppercase tracking-wide whitespace-nowrap transition-all relative ${
@@ -467,6 +467,7 @@ const StudentInvestorDashboard = () => {
 // --- VIEWS ---
 
 const StudentGuide = ({ setActiveTab }: { setActiveTab: (tab: StudentTab) => void }) => {
+  const { toast } = useToast();
   const steps = [
     {
       emoji: "🛡️",
@@ -546,7 +547,7 @@ const StudentGuide = ({ setActiveTab }: { setActiveTab: (tab: StudentTab) => voi
           <p className="text-indigo-200 font-medium text-lg max-w-xl mx-auto leading-relaxed">
             You're a <strong className="text-white">Student Investor</strong>. That means you can back your peers' businesses and earn real returns — all within a verified, campus-safe ecosystem.
           </p>
-          <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
+          <button 
             onClick={() => setActiveTab("ventures")}
             className="mt-8 bg-white text-violet-700 font-black text-xs uppercase tracking-[0.2em] px-10 py-4 rounded-full shadow-xl hover:-translate-y-1 transition-all"
           >
@@ -569,7 +570,7 @@ const StudentGuide = ({ setActiveTab }: { setActiveTab: (tab: StudentTab) => voi
               </div>
               <h4 className="text-base font-black text-slate-800 tracking-tight leading-tight">{step.title}</h4>
               <p className="text-sm font-medium text-slate-600 leading-relaxed flex-1">{step.desc}</p>
-              <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })}
+              <button 
                 onClick={() => setActiveTab(step.tab)}
                 className={`self-start ${step.btnBg} text-white text-[10px] font-black uppercase tracking-[0.2em] px-6 py-3 rounded-xl transition-all shadow-sm flex items-center gap-2`}
               >
@@ -599,6 +600,7 @@ const StudentGuide = ({ setActiveTab }: { setActiveTab: (tab: StudentTab) => voi
 };
 
 const StudentOverview = ({ formatNaira, profile, setActiveTab }: any) => {
+  const { toast } = useToast();
   const chartData = {
     labels: ["Oct", "Nov", "Dec", "Jan", "Feb", "Mar"],
     datasets: [
@@ -747,6 +749,7 @@ const StudentOverview = ({ formatNaira, profile, setActiveTab }: any) => {
 };
 
 const StudentVentures = ({ formatNaira, onSelect }: any) => {
+  const { toast } = useToast();
   const PEER_VENTURES = [
     {
       id: "chidi",
@@ -822,7 +825,7 @@ const StudentVentures = ({ formatNaira, onSelect }: any) => {
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
+            <button 
               onClick={() => onSelect(v)}
               className="py-2.5 text-[9px] font-black uppercase tracking-widest text-[#534ab7] bg-[#eeedfe] rounded-xl hover:bg-[#534ab7]/10 transition-all"
             >
@@ -839,6 +842,7 @@ const StudentVentures = ({ formatNaira, onSelect }: any) => {
 };
 
 const StudentPortfolio = ({ formatNaira }: any) => {
+  const { toast } = useToast();
   return (
     <div className="bg-white rounded-[1.5rem] border border-black/5 overflow-hidden">
       <div className="p-6 border-b border-black/5 bg-slate-50/30 flex justify-between items-center">
@@ -890,6 +894,7 @@ const StudentPortfolio = ({ formatNaira }: any) => {
 };
 
 const StudentSavings = ({ formatNaira }: any) => {
+  const { toast } = useToast();
   return (
     <div className="max-w-md mx-auto space-y-4">
       <div className="bg-[#534ab7] p-8 rounded-[2.5rem] text-white text-center shadow-2xl shadow-[#534ab7]/30 relative overflow-hidden">
@@ -924,6 +929,7 @@ const StudentSavings = ({ formatNaira }: any) => {
 };
 
 const StudentNotifications = () => {
+  const { toast } = useToast();
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between px-2">
@@ -958,6 +964,7 @@ const StudentProfile = ({
   startEditing, 
   onUpdate 
 }: any) => {
+  const { toast } = useToast();
   const displayName = profile?.full_name || "Student Investor";
   return (
     <div className="space-y-6">
@@ -1038,7 +1045,7 @@ const StudentProfile = ({
               </div>
             </div>
 
-            <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
+            <button 
               onClick={startEditing}
               className="w-full py-4 mt-8 border-2 border-[#534ab7] text-[#534ab7] font-black text-[11px] uppercase tracking-[0.2em] rounded-2xl hover:bg-[#eeedfe]/50 transition-all shadow-sm"
             >
@@ -1152,14 +1159,14 @@ const StudentProfile = ({
             </div>
 
             <div className="flex gap-4 pt-8 sticky bottom-0 bg-white pb-4">
-              <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
+              <button 
                 type="button"
                 onClick={() => setIsEditing(false)}
                 className="flex-[1] py-4 border-2 border-slate-200 text-slate-500 font-black tracking-widest uppercase text-[10px] rounded-2xl hover:bg-slate-50 transition-all"
               >
                 Discard
               </button>
-              <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
+              <button 
                 type="submit"
                 disabled={isSaving}
                 className="flex-[2] py-4 bg-[#534ab7] text-white font-black tracking-widest uppercase text-[10px] rounded-2xl shadow-xl shadow-[#534ab7]/30 hover:-translate-y-1 transition-all disabled:opacity-50 disabled:-translate-y-0"
@@ -1175,6 +1182,7 @@ const StudentProfile = ({
 };
 
 const VentureModal = ({ venture, onClose, formatNaira }: any) => {
+  const { toast } = useToast();
   return (
     <motion.div 
       initial={{ opacity: 0 }}
@@ -1264,6 +1272,7 @@ const StudentKYC = ({
   onSubmit, 
   setFile 
 }: any) => {
+  const { toast } = useToast();
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       {profile?.kyc_status !== 'verified' && !showForm && (
@@ -1277,7 +1286,7 @@ const StudentKYC = ({
               <p className="text-orange-700/60 text-xs font-bold uppercase tracking-[0.1em]">Verification required to trade ventures</p>
             </div>
           </div>
-          <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
+          <button 
             onClick={() => setShowForm(true)}
             className="w-full md:w-auto bg-orange-600 hover:bg-orange-700 text-white font-black text-[11px] uppercase tracking-[0.2em] px-10 py-5 rounded-2xl shadow-xl shadow-orange-900/10 transition-all hover:-translate-y-1"
           >
@@ -1294,7 +1303,7 @@ const StudentKYC = ({
         >
           <div className="absolute top-0 right-0 w-64 h-64 bg-violet-50 rounded-full blur-3xl -mr-32 -mt-32 opacity-50 pointer-events-none"></div>
           
-          <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
+          <button 
             onClick={() => setShowForm(false)} 
             className="absolute top-8 right-8 text-slate-300 hover:bg-slate-50 p-2 rounded-full transition-all z-10"
           >
@@ -1420,7 +1429,7 @@ const StudentKYC = ({
             </div>
             
             {profile?.kyc_status !== 'verified' && (
-              <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} 
+              <button 
                 onClick={() => setShowForm(true)}
                 className="w-full py-6 mt-10 border-4 border-dashed border-violet-100 text-[#534ab7] font-black text-[11px] uppercase tracking-[0.2em] rounded-3xl hover:bg-violet-50 transition-all font-sans"
               >

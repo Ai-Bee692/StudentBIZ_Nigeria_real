@@ -659,6 +659,7 @@ const CommunityGuide = ({
 };
 
 const CommunityOverview = ({ formatNaira, profile, setActiveTab }: any) => {
+  const { toast } = useToast();
   const chartData = {
     labels: ["Oct", "Nov", "Dec", "Jan", "Feb", "Mar"],
     datasets: [
@@ -1034,6 +1035,7 @@ const CommunityInflow = ({ formatNaira }: any) => {
 };
 
 const CommunityVentures = ({ formatNaira, onSelect }: any) => {
+  const { toast } = useToast();
   const ventures = [
     {
       id: "chidi",
@@ -1658,6 +1660,7 @@ const CommunityProfile = ({
 };
 
 const TrustProfileModal = ({ venture, onClose, formatNaira }: any) => {
+  const { toast } = useToast();
   // Same chart mapping as Alumni but with "plain English" labels
   const _repD: any = {
     chidi: [15, 20, 18, 22, 19, 25],
