@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,54 +25,63 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 
-// Sample business data (in real app, would fetch by ID)
-const businessData = {
-  id: "1",
-  name: "EcoSnacks Campus",
-  description: "Sustainable snack vending machines on university campuses, offering healthy and eco-friendly options to students. Our mission is to provide convenient, nutritious snacks while reducing plastic waste through biodegradable packaging.",
-  longDescription: `EcoSnacks Campus was born from a simple observation: students want healthy snacks, but campus vending machines are filled with processed junk food. We're changing that.
-
-Our vending machines are strategically placed in high-traffic areas like libraries, dorms, and student centers. Each machine offers a curated selection of organic, locally-sourced snacks in fully compostable packaging.
-
-What sets us apart:
-• Partnership with local organic farms
-• 100% biodegradable packaging
-• Smart inventory management to reduce waste
-• Student discount program
-• Carbon-neutral delivery operations`,
-  category: "Food & Beverage",
-  fundingGoal: 5000,
-  amountRaised: 3750,
-  interestRate: 12,
-  duration: 60,
-  riskLevel: "low" as const,
-  studentName: "Maya Chen",
-  university: "Stanford University",
-  investorCount: 24,
-  daysLeft: 12,
-  useOfFunds: [
-    { item: "Vending Machine Equipment", percentage: 40 },
-    { item: "Initial Inventory", percentage: 30 },
-    { item: "Marketing & Launch", percentage: 20 },
-    { item: "Operational Reserve", percentage: 10 }
-  ],
-  repaymentPlan: "Monthly installments over 60 days with 12% total return to investors.",
-  milestones: [
-    { title: "Phase 1: Equipment Purchase", status: "completed" },
-    { title: "Phase 2: Location Agreements", status: "completed" },
-    { title: "Phase 3: First Machine Installation", status: "in-progress" },
-    { title: "Phase 4: Campus-Wide Rollout", status: "pending" }
-  ]
-};
+import { supabase } from "@/lib/supabase";
+import { Loader2, Download, ExternalLink } from "lucide-react";
+import { Venture } from "@/components/BusinessCard";
 
 const BusinessDetail = () => {
   const { id } = useParams();
   const [investAmount, setInvestAmount] = useState("");
   const { toast } = useToast();
-  
-  const business = businessData; // In real app, fetch by id
-  const fundingProgress = (business.amountRaised / business.fundingGoal) * 100;
-  const remainingAmount = business.fundingGoal - business.amountRaised;
+  const [business, setBusiness] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBusiness = async () => {
+      if (!id) return;
+      try {
+        const { data, error } = await supabase
+          .from("ventures")
+          .select("*")
+          .eq("id", id)
+          .single();
+
+        if (error) throw error;
+        setBusiness(data);
+      } catch (err) {
+        console.error("Error fetching venture:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchBusiness();
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
+        <Navbar />
+        <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
+        <p className="font-semibold text-lg text-muted-foreground">Loading pitch deck...</p>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!business) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
+        <Navbar />
+        <h2 className="text-2xl font-bold text-foreground">Venture not found</h2>
+        <Link to="/businesses" className="mt-4 text-primary hover:underline">Return to marketplace</Link>
+        <Footer />
+      </div>
+    );
+  }
+
+  const amountRaised = business.amount_raised || 0;
+  const fundingProgress = (amountRaised / business.funding_goal) * 100;
+  const remainingAmount = business.funding_goal - amountRaised;
 
   const handleInvest = () => {
     const amount = parseFloat(investAmount);
@@ -88,15 +97,15 @@ const BusinessDetail = () => {
     if (amount > remainingAmount) {
       toast({
         title: "Amount exceeds remaining goal",
-        description: `Maximum investment is $${remainingAmount.toLocaleString()}`,
+        description: `Maximum investment is ₦${remainingAmount.toLocaleString()}`,
         variant: "destructive"
       });
       return;
     }
 
     toast({
-      title: "Investment submitted!",
-      description: `You've invested $${amount} in ${business.name}. Complete verification to finalize.`,
+      title: "Investment simulated!",
+      description: `You've expressed interest to invest ₦${amount.toLocaleString()} in ${business.name}. Payment gateway integration coming in Phase 4.`,
     });
   };
 
@@ -126,11 +135,14 @@ const BusinessDetail = () => {
               >
                 <div className="flex flex-wrap gap-2 mb-4">
                   <Badge variant="secondary">{business.category}</Badge>
-                  <RiskBadge level={business.riskLevel} />
+                  <RiskBadge level={business.risk_level} />
                 </div>
                 <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
                   {business.name}
                 </h1>
+                <p className="text-xl font-medium text-foreground mb-2">
+                  {business.tagline}
+                </p>
                 <p className="text-lg text-muted-foreground">{business.description}</p>
               </motion.div>
 
@@ -138,95 +150,98 @@ const BusinessDetail = () => {
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full gradient-hero flex items-center justify-center text-primary-foreground font-bold text-xl">
-                      {business.studentName.charAt(0)}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <User className="w-4 h-4 text-muted-foreground" />
-                        <span className="font-semibold text-foreground">{business.studentName}</span>
+                      <div className="w-14 h-14 rounded-full gradient-hero flex items-center justify-center text-primary-foreground font-bold text-xl overflow-hidden">
+                        {business.student_name.charAt(0)}
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <GraduationCap className="w-4 h-4" />
-                        {business.university}
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <User className="w-4 h-4 text-muted-foreground" />
+                          <span className="font-semibold text-foreground">{business.student_name}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <GraduationCap className="w-4 h-4" />
+                          {business.university}
                       </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* About */}
+              {/* Pitch Deck Information */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <FileText className="w-5 h-5 text-primary" />
-                    About This Venture
+                    Interactive Pitch Deck
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="prose prose-sm max-w-none text-muted-foreground whitespace-pre-line">
-                    {business.longDescription}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Use of Funds */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <DollarSign className="w-5 h-5 text-primary" />
-                    Use of Funds
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {business.useOfFunds.map((item, index) => (
-                    <div key={index}>
-                      <div className="flex justify-between text-sm mb-2">
-                        <span className="text-foreground">{item.item}</span>
-                        <span className="text-muted-foreground">{item.percentage}%</span>
+                <CardContent className="space-y-6">
+                  {business.problem_statement && (
+                    <div>
+                      <h3 className="font-bold text-foreground mb-2 flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4 text-warning" /> The Problem
+                      </h3>
+                      <div className="prose prose-sm max-w-none text-muted-foreground whitespace-pre-line bg-muted/30 p-4 rounded-xl">
+                        {business.problem_statement}
                       </div>
-                      <Progress value={item.percentage} variant="default" size="sm" />
                     </div>
-                  ))}
+                  )}
+                  {business.solution && (
+                    <div>
+                      <h3 className="font-bold text-foreground mb-2 flex items-center gap-2">
+                        <Target className="w-4 h-4 text-success" /> The Solution
+                      </h3>
+                      <div className="prose prose-sm max-w-none text-muted-foreground whitespace-pre-line bg-muted/30 p-4 rounded-xl">
+                        {business.solution}
+                      </div>
+                    </div>
+                  )}
+                  {business.business_website && (
+                    <div className="flex items-center gap-2 mt-4">
+                      <a href={business.business_website} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-primary hover:underline font-semibold">
+                        <ExternalLink className="w-4 h-4" /> View Business Website
+                      </a>
+                    </div>
+                  )}
+                  {business.pitch_deck_url && (
+                    <div className="mt-6 pt-6 border-t border-border">
+                      <a href={business.pitch_deck_url} target="_blank" rel="noreferrer">
+                        <Button variant="outline" className="w-full sm:w-auto flex items-center gap-2 border-primary text-primary hover:bg-primary/5">
+                          <Download className="w-4 h-4" /> Download Full Pitch Deck (PDF)
+                        </Button>
+                      </a>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
-              {/* Milestones */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="w-5 h-5 text-primary" />
-                    Project Milestones
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {business.milestones.map((milestone, index) => (
-                      <div key={index} className="flex items-start gap-3">
-                        {milestone.status === "completed" ? (
-                          <CheckCircle className="w-5 h-5 text-success mt-0.5" />
-                        ) : milestone.status === "in-progress" ? (
-                          <div className="w-5 h-5 rounded-full border-2 border-primary animate-pulse mt-0.5" />
-                        ) : (
-                          <div className="w-5 h-5 rounded-full border-2 border-muted mt-0.5" />
-                        )}
-                        <div>
-                          <span className={`font-medium ${
-                            milestone.status === "completed" ? "text-foreground" :
-                            milestone.status === "in-progress" ? "text-primary" :
-                            "text-muted-foreground"
-                          }`}>
-                            {milestone.title}
-                          </span>
-                          {milestone.status === "in-progress" && (
-                            <Badge variant="info" className="ml-2 text-xs">In Progress</Badge>
-                          )}
+              {/* Financial Context */}
+              {(business.monthly_revenue || business.profit_margin) && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-primary" />
+                      Financial Context
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      {business.monthly_revenue && (
+                        <div className="bg-muted/50 p-4 rounded-xl">
+                          <div className="text-sm text-muted-foreground mb-1">Avg. Monthly Revenue</div>
+                          <div className="text-2xl font-bold text-foreground">₦{business.monthly_revenue.toLocaleString()}</div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                      )}
+                      {business.profit_margin && (
+                        <div className="bg-muted/50 p-4 rounded-xl">
+                          <div className="text-sm text-muted-foreground mb-1">Est. Profit Margin</div>
+                          <div className="text-2xl font-bold text-success">{business.profit_margin}%</div>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Repayment Plan */}
               <Card>
@@ -237,9 +252,13 @@ const BusinessDetail = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">{business.repaymentPlan}</p>
+                  <p className="text-muted-foreground">
+                    Installments over {business.duration_days} days with a {business.interest_rate}% total return to investors.
+                  </p>
                 </CardContent>
               </Card>
+
+
             </div>
 
             {/* Sidebar - Investment Card */}
@@ -253,48 +272,42 @@ const BusinessDetail = () => {
                 <Card variant="elevated" className="overflow-hidden">
                   <div className="gradient-hero p-6 text-primary-foreground">
                     <div className="text-3xl font-bold mb-1">
-                      ${business.amountRaised.toLocaleString()}
+                      ₦{amountRaised.toLocaleString()}
                     </div>
                     <div className="text-sm opacity-80">
-                      raised of ${business.fundingGoal.toLocaleString()} goal
+                      raised of ₦{business.funding_goal.toLocaleString()} goal
                     </div>
                   </div>
                   <CardContent className="p-6 space-y-6">
                     <Progress value={fundingProgress} variant="success" size="lg" />
                     
-                    <div className="grid grid-cols-3 gap-4 text-center">
+                    <div className="grid grid-cols-2 gap-4 text-center">
                       <div>
                         <TrendingUp className="w-5 h-5 mx-auto mb-1 text-success" />
-                        <div className="font-bold text-lg text-foreground">{business.interestRate}%</div>
+                        <div className="font-bold text-lg text-foreground">{business.interest_rate}%</div>
                         <div className="text-xs text-muted-foreground">Return</div>
                       </div>
                       <div>
                         <Clock className="w-5 h-5 mx-auto mb-1 text-info" />
-                        <div className="font-bold text-lg text-foreground">{business.duration}</div>
+                        <div className="font-bold text-lg text-foreground">{business.duration_days}</div>
                         <div className="text-xs text-muted-foreground">Days</div>
                       </div>
-                      <div>
-                        <User className="w-5 h-5 mx-auto mb-1 text-primary" />
-                        <div className="font-bold text-lg text-foreground">{business.investorCount}</div>
-                        <div className="text-xs text-muted-foreground">Investors</div>
-                      </div>
                     </div>
-
                     <div className="space-y-3">
-                      <Label htmlFor="amount">Investment Amount</Label>
+                      <Label htmlFor="amount">Investment Amount (₦)</Label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₦</span>
                         <Input
                           id="amount"
                           type="number"
-                          placeholder="100"
+                          placeholder="50000"
                           className="pl-7"
                           value={investAmount}
                           onChange={(e) => setInvestAmount(e.target.value)}
                         />
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Minimum investment: $25 • ${remainingAmount.toLocaleString()} remaining
+                        Minimum investment: ₦5,000 • ₦{remainingAmount.toLocaleString()} remaining
                       </p>
                     </div>
 
@@ -302,18 +315,18 @@ const BusinessDetail = () => {
                       <div className="bg-muted/50 rounded-lg p-4 space-y-2">
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Your investment</span>
-                          <span className="text-foreground">${parseFloat(investAmount).toLocaleString()}</span>
+                          <span className="text-foreground">₦{parseFloat(investAmount).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Expected return ({business.interestRate}%)</span>
+                          <span className="text-muted-foreground">Expected return ({business.interest_rate}%)</span>
                           <span className="text-success">
-                            +${(parseFloat(investAmount) * business.interestRate / 100).toFixed(2)}
+                            +₦{(parseFloat(investAmount) * business.interest_rate / 100).toFixed(2)}
                           </span>
                         </div>
                         <div className="border-t border-border pt-2 flex justify-between font-semibold">
                           <span className="text-foreground">Total at maturity</span>
                           <span className="text-foreground">
-                            ${(parseFloat(investAmount) * (1 + business.interestRate / 100)).toFixed(2)}
+                            ₦{(parseFloat(investAmount) * (1 + business.interest_rate / 100)).toFixed(2)}
                           </span>
                         </div>
                       </div>

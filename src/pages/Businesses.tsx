@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
-import { Search, Filter, SlidersHorizontal } from "lucide-react";
+import { Search, Filter, SlidersHorizontal, Loader2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import BusinessCard, { Business } from "@/components/BusinessCard";
+import BusinessCard, { Venture } from "@/components/BusinessCard";
+import { supabase } from "@/lib/supabase";
 import {
   Select,
   SelectContent,
@@ -16,127 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const allBusinesses: Business[] = [
-  {
-    id: "1",
-    name: "EcoSnacks Campus",
-    description: "Sustainable snack vending machines on university campuses, offering healthy and eco-friendly options to students.",
-    category: "Food & Beverage",
-    fundingGoal: 5000,
-    amountRaised: 3750,
-    interestRate: 12,
-    duration: 60,
-    riskLevel: "low",
-    studentName: "Maya Chen",
-    university: "Stanford University"
-  },
-  {
-    id: "2",
-    name: "TutorMatch Pro",
-    description: "AI-powered platform connecting students with peer tutors based on learning style and subject expertise.",
-    category: "EdTech",
-    fundingGoal: 8000,
-    amountRaised: 4200,
-    interestRate: 15,
-    duration: 90,
-    riskLevel: "medium",
-    studentName: "James Rodriguez",
-    university: "MIT"
-  },
-  {
-    id: "3",
-    name: "Campus Thrift",
-    description: "Mobile app for buying and selling second-hand textbooks and dorm essentials within university communities.",
-    category: "Marketplace",
-    fundingGoal: 3000,
-    amountRaised: 2800,
-    interestRate: 10,
-    duration: 45,
-    riskLevel: "low",
-    studentName: "Sarah Kim",
-    university: "UC Berkeley"
-  },
-  {
-    id: "4",
-    name: "StudyBuddy VR",
-    description: "Virtual reality study rooms for remote collaboration, making distance learning more engaging and interactive.",
-    category: "EdTech",
-    fundingGoal: 12000,
-    amountRaised: 5400,
-    interestRate: 15,
-    duration: 90,
-    riskLevel: "high",
-    studentName: "Alex Thompson",
-    university: "Georgia Tech"
-  },
-  {
-    id: "5",
-    name: "GreenPrint Labs",
-    description: "Affordable 3D printing service for engineering students with sustainable, recycled materials.",
-    category: "Technology",
-    fundingGoal: 6000,
-    amountRaised: 4800,
-    interestRate: 12,
-    duration: 60,
-    riskLevel: "low",
-    studentName: "David Park",
-    university: "Carnegie Mellon"
-  },
-  {
-    id: "6",
-    name: "Campus Fitness App",
-    description: "Gamified fitness app designed for students, with campus-specific challenges and social features.",
-    category: "Health & Wellness",
-    fundingGoal: 7500,
-    amountRaised: 2250,
-    interestRate: 12,
-    duration: 60,
-    riskLevel: "medium",
-    studentName: "Emma Wilson",
-    university: "UCLA"
-  },
-  {
-    id: "7",
-    name: "QuickLaundry",
-    description: "On-demand laundry pickup and delivery service specifically for busy college students.",
-    category: "Services",
-    fundingGoal: 4000,
-    amountRaised: 3600,
-    interestRate: 10,
-    duration: 45,
-    riskLevel: "low",
-    studentName: "Michael Lee",
-    university: "NYU"
-  },
-  {
-    id: "8",
-    name: "CampusEats Delivery",
-    description: "Student-run food delivery from local restaurants to dormitories and campus buildings.",
-    category: "Food & Beverage",
-    fundingGoal: 5500,
-    amountRaised: 1650,
-    interestRate: 15,
-    duration: 90,
-    riskLevel: "high",
-    studentName: "Jessica Brown",
-    university: "University of Michigan"
-  },
-  {
-    id: "9",
-    name: "NoteShare Pro",
-    description: "Premium note-sharing platform with AI-powered summaries and study guides for university courses.",
-    category: "EdTech",
-    fundingGoal: 9000,
-    amountRaised: 7200,
-    interestRate: 12,
-    duration: 60,
-    riskLevel: "medium",
-    studentName: "Ryan Martinez",
-    university: "UT Austin"
-  }
-];
-
-const categories = ["All", "EdTech", "Food & Beverage", "Marketplace", "Technology", "Health & Wellness", "Services"];
+const categories = ["All", "Agriculture", "Technology", "Fashion", "Food & Beverage", "Retail", "Services", "EdTech", "Health & Wellness", "Other"];
 const riskLevels = ["All", "Low", "Medium", "High"];
 
 const Businesses = () => {
@@ -144,26 +25,51 @@ const Businesses = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedRisk, setSelectedRisk] = useState("All");
   const [sortBy, setSortBy] = useState("newest");
+  const [ventures, setVentures] = useState<Venture[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredBusinesses = allBusinesses.filter((business) => {
-    const matchesSearch = business.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         business.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "All" || business.category === selectedCategory;
+  useEffect(() => {
+    const fetchVentures = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('ventures')
+          .select('*')
+          .in('status', ['submitted', 'listed']); // Fetching both for demo purposes, ideally just 'listed'
+        
+        if (error) throw error;
+        setVentures((data || []) as Venture[]);
+      } catch (error) {
+        console.error("Error fetching ventures:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchVentures();
+  }, []);
+
+  const filteredBusinesses = ventures.filter((venture) => {
+    const matchesSearch = venture.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         venture.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === "All" || venture.category === selectedCategory;
     const matchesRisk = selectedRisk === "All" || 
-                       business.riskLevel.toLowerCase() === selectedRisk.toLowerCase();
+                       venture.risk_level.toLowerCase() === selectedRisk.toLowerCase();
     
     return matchesSearch && matchesCategory && matchesRisk;
   });
 
   const sortedBusinesses = [...filteredBusinesses].sort((a, b) => {
+    const aRaised = a.amount_raised || 0;
+    const bRaised = b.amount_raised || 0;
+    
     switch (sortBy) {
       case "funded":
-        return (b.amountRaised / b.fundingGoal) - (a.amountRaised / a.fundingGoal);
+        return (bRaised / b.funding_goal) - (aRaised / a.funding_goal);
       case "return":
-        return b.interestRate - a.interestRate;
+        return b.interest_rate - a.interest_rate;
       case "goal":
-        return a.fundingGoal - b.fundingGoal;
+        return a.funding_goal - b.funding_goal;
       default:
+        // Newest (assuming larger ID or sorting by a date field if existed)
         return 0;
     }
   });
@@ -296,10 +202,15 @@ const Businesses = () => {
             </p>
           </div>
 
-          {sortedBusinesses.length > 0 ? (
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+              <Loader2 className="w-12 h-12 animate-spin mb-4 text-[#1a7a4a]" />
+              <p className="font-semibold text-lg">Loading ventures...</p>
+            </div>
+          ) : sortedBusinesses.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {sortedBusinesses.map((business, index) => (
-                <BusinessCard key={business.id} business={business} delay={index * 0.05} />
+                <BusinessCard key={business.id} venture={business} delay={index * 0.05} />
               ))}
             </div>
           ) : (

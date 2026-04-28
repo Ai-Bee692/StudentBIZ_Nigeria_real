@@ -6,28 +6,32 @@ import { Progress } from "@/components/ui/progress";
 import { Clock, Target, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
 
-export interface Business {
+export interface Venture {
   id: string;
+  entrepreneur_id: string;
   name: string;
   description: string;
+  tagline?: string;
   category: string;
-  fundingGoal: number;
-  amountRaised: number;
-  interestRate: number;
-  duration: number;
-  riskLevel: "low" | "medium" | "high";
+  funding_goal: number;
+  amount_raised?: number;
+  interest_rate: number;
+  duration_days: number;
+  risk_level: "low" | "medium" | "high" | "pending";
   image?: string;
-  studentName: string;
+  student_name: string;
   university: string;
+  status: string;
 }
 
 interface BusinessCardProps {
-  business: Business;
+  venture: Venture;
   delay?: number;
 }
 
-const BusinessCard = ({ business, delay = 0 }: BusinessCardProps) => {
-  const fundingProgress = (business.amountRaised / business.fundingGoal) * 100;
+const BusinessCard = ({ venture, delay = 0 }: BusinessCardProps) => {
+  const amountRaised = venture.amount_raised || 0;
+  const fundingProgress = (amountRaised / venture.funding_goal) * 100;
 
   return (
     <motion.div
@@ -38,29 +42,40 @@ const BusinessCard = ({ business, delay = 0 }: BusinessCardProps) => {
     >
       <Card variant="interactive" className="h-full overflow-hidden group">
         {/* Image */}
-        <div className="relative h-48 overflow-hidden">
-          <div className="absolute inset-0 gradient-hero opacity-80" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-6xl font-display font-bold text-primary-foreground/30">
-              {business.name.charAt(0)}
+        <div className="relative h-48 overflow-hidden bg-muted">
+          {venture.image ? (
+            <img src={venture.image} alt={venture.name} className="w-full h-full object-cover" />
+          ) : (
+            <div className="absolute inset-0 gradient-hero opacity-80" />
+          )}
+          {!venture.image && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-6xl font-display font-bold text-primary-foreground/30">
+                {venture.name.charAt(0)}
+              </div>
             </div>
-          </div>
+          )}
           <div className="absolute top-4 left-4 flex gap-2">
             <Badge variant="secondary" className="bg-card/90 text-foreground">
-              {business.category}
+              {venture.category}
             </Badge>
           </div>
           <div className="absolute top-4 right-4">
-            <RiskBadge level={business.riskLevel} />
+            <RiskBadge level={venture.risk_level} />
           </div>
         </div>
 
         <CardContent className="p-5">
-          <h3 className="font-display font-semibold text-lg text-foreground mb-2 group-hover:text-primary transition-colors">
-            {business.name}
-          </h3>
+          <div className="flex justify-between items-start mb-2">
+            <h3 className="font-display font-semibold text-lg text-foreground group-hover:text-primary transition-colors line-clamp-1">
+              {venture.name}
+            </h3>
+            <span className="text-[10px] text-muted-foreground font-semibold bg-muted px-2 py-1 rounded-md whitespace-nowrap">
+              {venture.university}
+            </span>
+          </div>
           <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-            {business.description}
+            {venture.tagline || venture.description}
           </p>
 
           {/* Funding Progress */}
@@ -68,7 +83,7 @@ const BusinessCard = ({ business, delay = 0 }: BusinessCardProps) => {
             <div className="flex justify-between text-sm mb-2">
               <span className="text-muted-foreground">Raised</span>
               <span className="font-semibold text-foreground">
-                ${business.amountRaised.toLocaleString()} / ${business.fundingGoal.toLocaleString()}
+                ₦{amountRaised.toLocaleString()} / ₦{venture.funding_goal.toLocaleString()}
               </span>
             </div>
             <Progress value={fundingProgress} variant="success" size="sm" />
@@ -78,12 +93,12 @@ const BusinessCard = ({ business, delay = 0 }: BusinessCardProps) => {
           <div className="grid grid-cols-3 gap-3 text-center">
             <div className="p-2 rounded-lg bg-muted/50">
               <TrendingUp className="w-4 h-4 mx-auto mb-1 text-success" />
-              <div className="font-semibold text-sm text-foreground">{business.interestRate}%</div>
+              <div className="font-semibold text-sm text-foreground">{venture.interest_rate}%</div>
               <div className="text-xs text-muted-foreground">Return</div>
             </div>
             <div className="p-2 rounded-lg bg-muted/50">
               <Clock className="w-4 h-4 mx-auto mb-1 text-info" />
-              <div className="font-semibold text-sm text-foreground">{business.duration}</div>
+              <div className="font-semibold text-sm text-foreground">{venture.duration_days}</div>
               <div className="text-xs text-muted-foreground">Days</div>
             </div>
             <div className="p-2 rounded-lg bg-muted/50">
@@ -95,9 +110,9 @@ const BusinessCard = ({ business, delay = 0 }: BusinessCardProps) => {
         </CardContent>
 
         <CardFooter className="p-5 pt-0">
-          <Link to={`/businesses/${business.id}`} className="w-full">
+          <Link to={`/businesses/${venture.id}`} className="w-full">
             <Button variant="default" className="w-full">
-              View Details
+              View Pitch Deck
             </Button>
           </Link>
         </CardFooter>

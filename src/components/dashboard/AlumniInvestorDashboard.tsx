@@ -71,6 +71,22 @@ type AlumniTab =
   | "notifications"
   | "profile";
 
+// --- INTERNAL COMPONENTS ---
+const TrustBadge = ({ type }: { type: 'id' | 'investor' | 'alma' }) => {
+  const configs = {
+    id: { label: 'Identity Verified', icon: <ShieldCheck className="w-3 h-3" />, color: 'bg-green-50 text-green-700 border-green-200' },
+    investor: { label: 'Verified Investor', icon: <Briefcase className="w-3 h-3" />, color: 'bg-blue-50 text-blue-700 border-blue-200' },
+    alma: { label: 'Alma Mater Linked', icon: <School className="w-3 h-3" />, color: 'bg-purple-50 text-purple-700 border-purple-200' },
+  };
+  const config = configs[type];
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border ${config.color} shadow-sm animate-fade-in`}>
+      {config.icon}
+      {config.label}
+    </span>
+  );
+};
+
 const AlumniInvestorDashboard = () => {
   const { profile, signOut } = useAuth();
   const { toast } = useToast();
@@ -222,6 +238,30 @@ const AlumniInvestorDashboard = () => {
 
     setIsSubmittingKyc(true);
     console.log("KYC Submission started for Alumni:", profile.id);
+
+    // ── ADVANCED KYC VALIDATION (11-DIGIT RULE) ──
+    const cleanBvn = kycForm.bvn.replace(/\D/g, "");
+    const cleanNin = kycForm.nationalIdNumber.replace(/\D/g, "");
+
+    if (cleanBvn.length !== 11) {
+      toast({ 
+        title: "Invalid BVN Format", 
+        description: "Your Bank Verification Number (BVN) must be exactly 11 digits.", 
+        variant: "destructive" 
+      });
+      setIsSubmittingKyc(false);
+      return;
+    }
+
+    if (cleanNin && cleanNin.length !== 11) {
+      toast({ 
+        title: "Invalid NIN Format", 
+        description: "Your National Identity Number (NIN) must be exactly 11 digits.", 
+        variant: "destructive" 
+      });
+      setIsSubmittingKyc(false);
+      return;
+    }
 
     try {
       let idUrl = profile?.student_id_url;
@@ -1324,9 +1364,19 @@ const AlumniProfile = ({
           <h3 className="text-xl font-black text-slate-800 tracking-tight">
             {displayName}
           </h3>
-          <p className="text-xs font-black text-[#1a7a4a] uppercase tracking-[0.2em] mt-1 bg-emerald-50 px-3 py-1 rounded-full">
-            Alumni Investor
-          </p>
+                      <p className="text-xs font-black text-[#1a7a4a] uppercase tracking-[0.2em] mt-1 bg-emerald-50 px-3 py-1 rounded-full">
+              Alumni Investor
+            </p>
+            
+            <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
+              {profile?.kyc_status === 'verified' && <TrustBadge type="id" />}
+              {profile?.kyc_status === 'verified' && <TrustBadge type="investor" />}
+              {profile?.school_name && <TrustBadge type="alma" />}
+              {(!profile?.kyc_status || profile?.kyc_status === 'pending') && (
+                <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full">Not Verified</span>
+              )}
+            </div>
+
         </div>
 
         {!isEditing ? (

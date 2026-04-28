@@ -24,7 +24,22 @@ import {
   CreditCard,
   Building,
   ShieldAlert,
-  ArrowRight
+  ArrowRight,
+  PlusCircle,
+  Send,
+  FileText,
+  Percent,
+  Users,
+  Store,
+  Globe,
+  Phone,
+  ChevronLeft,
+  Clock,
+  Star,
+  Layers,
+  Lock,
+  Award,
+  Zap
 } from "lucide-react";
 import {
   Chart as ChartJS,
@@ -52,6 +67,112 @@ ChartJS.register(
   Filler
 );
 
+// ── UTILITIES ──
+const formatCurrency = (amt: any) => {
+  return new Intl.NumberFormat('en-NG', {
+    style: 'currency',
+    currency: 'NGN',
+    maximumFractionDigits: 0
+  }).format(Number(amt) || 0);
+};
+
+// ── INTERNAL COMPONENTS ──
+const TrustBadge = ({ type }: { type: 'id' | 'academic' | 'founder' }) => {
+  const configs = {
+    id: { label: 'ID Verified', icon: <ShieldCheck className="w-3 h-3" />, color: 'bg-green-50 text-green-700 border-green-200' },
+    academic: { label: 'Top Tier GPA', icon: <Award className="w-3 h-3" />, color: 'bg-blue-50 text-blue-700 border-blue-200' },
+    founder: { label: 'Venture Founder', icon: <Zap className="w-3 h-3" />, color: 'bg-purple-50 text-purple-700 border-purple-200' },
+  };
+  const config = configs[type];
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border ${config.color} shadow-sm animate-fade-in`}>
+      {config.icon}
+      {config.label}
+    </span>
+  );
+};
+
+const VenturePreviewCard = ({ form, profile, step, localImage }: any) => {
+  const imageUrl = localImage || form.image || null;
+  
+  return (
+    <div className="glass-card rounded-[2.5rem] overflow-hidden sticky top-8 animate-scale-in">
+      <div className="relative h-48 bg-slate-100 overflow-hidden">
+        {imageUrl ? (
+          <img src={imageUrl} alt="Preview" className="w-full h-full object-cover transition-transform duration-700 hover:scale-110" />
+        ) : (
+          <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 gap-2 bg-gradient-to-br from-slate-50 to-slate-100">
+            <Store size={48} className="opacity-20" />
+            <span className="text-[10px] font-black uppercase tracking-widest opacity-40">Your Business Image Here</span>
+          </div>
+        )}
+        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm">
+          <span className="text-[10px] font-black uppercase tracking-widest text-[#1a56db]">Marketplace Preview</span>
+        </div>
+      </div>
+      
+      <div className="p-6 space-y-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#1a56db] bg-blue-50 px-2 py-0.5 rounded">
+              {form.category || 'Category'}
+            </span>
+            <span className={`text-[9px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded ${
+              form.risk_level === 'low' ? 'bg-green-50 text-green-600' : 
+              form.risk_level === 'high' ? 'bg-red-50 text-red-600' : 'bg-orange-50 text-orange-600'
+            }`}>
+              {form.risk_level ? `${form.risk_level} Risk` : 'Risk Level'}
+            </span>
+          </div>
+          <h3 className="text-xl font-black text-slate-800 leading-tight">
+            {form.name || 'Your Venture Name'}
+          </h3>
+          <p className="text-xs font-bold text-slate-400 mt-0.5">
+            Founder: {profile?.full_name || 'Entrepreneur Name'}
+          </p>
+        </div>
+
+        <p className="text-[13px] font-medium text-slate-600 leading-relaxed line-clamp-3">
+          {form.description || 'Provide a compelling description in Step 2 to attract investors...'}
+        </p>
+
+        <div className="grid grid-cols-2 gap-3 pt-2">
+          <div className="bg-slate-50 rounded-2xl p-3 border border-slate-100">
+            <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">Funding Goal</div>
+            <div className="text-sm font-black text-slate-800">{formatCurrency(form.funding_goal)}</div>
+          </div>
+          <div className="bg-slate-50 rounded-2xl p-3 border border-slate-100">
+            <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">Fixed ROI</div>
+            <div className="text-sm font-black text-slate-800">{form.interest_rate || '0'}%</div>
+          </div>
+        </div>
+
+        <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+              <ShieldCheck size={16} />
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Verified Student</span>
+          </div>
+          <div className="text-right">
+            <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">Duration</div>
+            <div className="text-[11px] font-black text-slate-800">{form.duration_days || '—'} days</div>
+          </div>
+        </div>
+
+        <button disabled className="w-full py-3 bg-[#1a56db] text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-xl opacity-50">
+          Support Student
+        </button>
+      </div>
+
+      {/* Shimmer Effect when data is missing */}
+      {(!form.name || !form.description) && (
+        <div className="absolute inset-0 bg-white/10 pointer-events-none animate-shimmer opacity-30" />
+      )}
+    </div>
+  );
+};
+
 const StudentDashboardTemplate = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const { profile, user, loading, signOut } = useAuth();
@@ -63,6 +184,7 @@ const StudentDashboardTemplate = () => {
   const { toast } = useToast();
   
   const [showKycForm, setShowKycForm] = useState(false);
+
   const [kycForm, setKycForm] = useState({
     bvn: "",
     bankName: "",
@@ -86,6 +208,59 @@ const StudentDashboardTemplate = () => {
   const [studentIdFile, setStudentIdFile] = useState<File | null>(null);
   const [businessDocFile, setBusinessDocFile] = useState<File | null>(null);
   const [isSubmittingKyc, setIsSubmittingKyc] = useState(false);
+
+  // ── VENTURE STATE ──────────────────────────────────────────────────────────
+  interface Venture {
+    id: string;
+    entrepreneur_id: string;
+    name: string;
+    description: string;
+    category: string;
+    funding_goal: number;
+    amount_raised: number;
+    interest_rate: number;
+    duration_days: number;
+    risk_level: 'low' | 'medium' | 'high' | 'pending';
+    image: string | null;
+    student_name: string;
+    university: string;
+    tagline: string | null;
+    problem_statement: string | null;
+    solution: string | null;
+    monthly_revenue: number | null;
+    profit_margin: number | null;
+    operating_since: string | null;
+    employees: number;
+    pitch_deck_url: string | null;
+    business_website: string | null;
+    whatsapp_number: string | null;
+    status: 'draft' | 'submitted' | 'under_review' | 'listed' | 'rejected';
+    rejection_reason: string | null;
+    submitted_at: string | null;
+    created_at: string;
+  }
+
+  const VENTURE_CATEGORIES = [
+    'Fashion & Retail', 'Food & Catering', 'Tech & Software', 'EdTech',
+    'Agriculture', 'Logistics', 'Creative Arts', 'Health & Beauty',
+    'Education/Tutoring', 'Finance/Fintech', 'Other'
+  ];
+
+  const [venture, setVenture] = useState<Venture | null>(null);
+  const [ventureLoading, setVentureLoading] = useState(true);
+  const [showVentureForm, setShowVentureForm] = useState(false);
+  const [ventureStep, setVentureStep] = useState(1);
+  const [isSubmittingVenture, setIsSubmittingVenture] = useState(false);
+  const [pitchDeckFile, setPitchDeckFile] = useState<File | null>(null);
+  const [productImageFile, setProductImageFile] = useState<File | null>(null);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+  const [ventureForm, setVentureForm] = useState({
+    name: '', tagline: '', category: '', operating_since: '',
+    employees: '1', whatsapp_number: '', description: '',
+    problem_statement: '', solution: '', business_website: '',
+    funding_goal: '', interest_rate: '', duration_days: '',
+    risk_level: '', monthly_revenue: '', profit_margin: '',
+  });
 
   // Profile Edit State
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -216,6 +391,30 @@ const StudentDashboardTemplate = () => {
     }
     setIsSubmittingKyc(true);
     console.log("Starting Entrepreneur KYC submission for userId:", userId);
+
+    // ── ADVANCED KYC VALIDATION (11-DIGIT RULE) ──
+    const cleanBvn = kycForm.bvn.replace(/\D/g, "");
+    const cleanNin = kycForm.nationalIdNumber.replace(/\D/g, "");
+
+    if (cleanBvn.length !== 11) {
+      toast({ 
+        title: "Invalid BVN Format", 
+        description: "Your Bank Verification Number (BVN) must be exactly 11 digits.", 
+        variant: "destructive" 
+      });
+      setIsSubmittingKyc(false);
+      return;
+    }
+
+    if (cleanNin && cleanNin.length !== 11) {
+      toast({ 
+        title: "Invalid NIN Format", 
+        description: "Your National Identity Number (NIN) must be exactly 11 digits.", 
+        variant: "destructive" 
+      });
+      setIsSubmittingKyc(false);
+      return;
+    }
 
     try {
       let studentIdUrl = profile?.student_id_url;
@@ -397,6 +596,238 @@ const StudentDashboardTemplate = () => {
     },
   };
 
+  // ── VENTURE FETCH ───────────────────────────────────────────────────────────
+  React.useEffect(() => {
+    const userId = user?.id || profile?.id;
+    if (!userId) { setVentureLoading(false); return; }
+    const loadVenture = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('ventures')
+          .select('*')
+          .eq('entrepreneur_id', userId)
+          .maybeSingle();
+        if (error) throw error;
+        if (data) {
+          setVenture(data as Venture);
+          // Pre-fill form so user can edit their existing venture
+          setVentureForm({
+            name: data.name || '',
+            tagline: data.tagline || '',
+            category: data.category || '',
+            operating_since: data.operating_since || '',
+            employees: String(data.employees || 1),
+            whatsapp_number: data.whatsapp_number || '',
+            description: data.description || '',
+            problem_statement: data.problem_statement || '',
+            solution: data.solution || '',
+            business_website: data.business_website || '',
+            funding_goal: String(data.funding_goal || ''),
+            interest_rate: String(data.interest_rate || ''),
+            duration_days: String(data.duration_days || ''),
+            risk_level: data.risk_level || '',
+            monthly_revenue: String(data.monthly_revenue || ''),
+            profit_margin: String(data.profit_margin || ''),
+          });
+        }
+      } catch (err: any) {
+        console.error('Venture fetch error:', err.message);
+      } finally {
+        setVentureLoading(false);
+      }
+    };
+    loadVenture();
+  }, [user?.id, profile?.id]);
+
+  const handleSaveDraft = async () => {
+    const userId = user?.id || profile?.id;
+    if (!userId || !ventureForm.name.trim()) {
+      toast({ title: 'Business name required', description: 'Please enter your business name before saving a draft.', variant: 'destructive' });
+      return;
+    }
+    setIsSubmittingVenture(true);
+    try {
+      const payload: any = {
+        entrepreneur_id: userId,
+        status: 'draft',
+        student_name: profile?.full_name || user?.user_metadata?.full_name || 'Entrepreneur',
+        university: profile?.school_name || 'University',
+        name: ventureForm.name.trim(),
+        description: ventureForm.description.trim() || 'Draft — not yet complete',
+        category: ventureForm.category || 'Other',
+        funding_goal: ventureForm.funding_goal ? parseFloat(ventureForm.funding_goal) : 50000,
+        interest_rate: ventureForm.interest_rate ? parseFloat(ventureForm.interest_rate) : 9,
+        duration_days: ventureForm.duration_days ? parseInt(ventureForm.duration_days) : 45,
+        risk_level: ventureForm.risk_level || 'low',
+        tagline: ventureForm.tagline.trim() || null,
+        problem_statement: ventureForm.problem_statement.trim() || null,
+        solution: ventureForm.solution.trim() || null,
+        business_website: ventureForm.business_website.trim() || null,
+        whatsapp_number: ventureForm.whatsapp_number.trim() || null,
+        monthly_revenue: ventureForm.monthly_revenue ? parseFloat(ventureForm.monthly_revenue) : null,
+        profit_margin: ventureForm.profit_margin ? parseFloat(ventureForm.profit_margin) : null,
+        operating_since: ventureForm.operating_since || null,
+        employees: ventureForm.employees ? parseInt(ventureForm.employees) : 1,
+        updated_at: new Date().toISOString(),
+      };
+      const { data, error } = await supabase.from('ventures').upsert(payload, { onConflict: 'entrepreneur_id' }).select().single();
+      if (error) throw error;
+      setVenture(data as Venture);
+      setShowVentureForm(false);
+      toast({ title: 'Draft saved! ✅', description: 'Your venture has been saved. Submit it when you\'re ready.' });
+    } catch (err: any) {
+      toast({ title: 'Save failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setIsSubmittingVenture(false);
+    }
+  };
+
+  const handleVentureSubmit = async () => {
+    console.log("handleVentureSubmit: Start");
+    const userId = user?.id || profile?.id;
+    if (!userId) {
+      console.error("handleVentureSubmit: No userId found");
+      toast({ title: 'Authentication Error', description: 'Please log in again.', variant: 'destructive' });
+      return;
+    }
+
+    // KYC Gate
+    if (!profile?.kyc_status || profile.kyc_status === 'pending') {
+      console.log("handleVentureSubmit: KYC Required");
+      toast({ title: 'KYC Required 🔒', description: 'Complete your KYC verification before submitting a venture.', variant: 'destructive' });
+      setActiveTab('credit');
+      return;
+    }
+
+    // Validation
+    const f = ventureForm;
+    if (!f.name.trim() || !f.description.trim() || !f.category || !f.funding_goal) {
+      console.log("handleVentureSubmit: Missing fields");
+      toast({ title: 'Missing required fields', description: 'Please fill all required fields before submitting.', variant: 'destructive' });
+      return;
+    }
+
+    const goal = parseFloat(f.funding_goal);
+    if (isNaN(goal) || goal < 50000 || goal > 300000) {
+      console.log("handleVentureSubmit: Invalid goal", goal);
+      toast({ title: 'Invalid funding goal', description: 'Funding goal must be between ₦50,000 and ₦300,000.', variant: 'destructive' });
+      return;
+    }
+
+    setIsSubmittingVenture(true);
+    console.log("handleVentureSubmit: Processing...");
+
+    try {
+      let imageUrl = venture?.image || null;
+      let pitchDeckUrl = venture?.pitch_deck_url || null;
+
+      // Helper for uploads with timeout
+      const uploadWithTimeout = async (bucket: string, path: string, file: File) => {
+        const uploadPromise = supabase.storage.from(bucket).upload(path, file, { upsert: true });
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error("Upload timed out after 15 seconds")), 15000)
+        );
+        return Promise.race([uploadPromise, timeoutPromise]) as Promise<{ data: any, error: any }>;
+      };
+
+      if (productImageFile) {
+        console.log("handleVentureSubmit: Uploading image to 'kyc-documents'...");
+        try {
+          const ext = productImageFile.name.split('.').pop();
+          const path = `${userId}/vimg-${Date.now()}.${ext}`;
+          const { error: imgErr } = await uploadWithTimeout('kyc-documents', path, productImageFile);
+          
+          if (imgErr) {
+            console.error("Image upload error response:", imgErr);
+          } else {
+            const { data: { publicUrl } } = supabase.storage.from('kyc-documents').getPublicUrl(path);
+            imageUrl = publicUrl;
+            console.log("Image uploaded successfully:", imageUrl);
+          }
+        } catch (e: any) { 
+          console.error("Image upload catch block:", e.message);
+          toast({ title: 'Image Upload Failed', description: e.message + ". Continuing with submission...", variant: 'destructive' });
+        }
+      }
+
+      if (pitchDeckFile) {
+        console.log("handleVentureSubmit: Uploading pitch deck to 'kyc-documents'...");
+        try {
+          const ext = pitchDeckFile.name.split('.').pop();
+          const path = `${userId}/pdeck-${Date.now()}.${ext}`;
+          const { error: pdfErr } = await uploadWithTimeout('kyc-documents', path, pitchDeckFile);
+          
+          if (pdfErr) {
+            console.error("Pitch deck upload error response:", pdfErr);
+          } else {
+            const { data: { publicUrl } } = supabase.storage.from('kyc-documents').getPublicUrl(path);
+            pitchDeckUrl = publicUrl;
+            console.log("Pitch deck uploaded successfully:", pitchDeckUrl);
+          }
+        } catch (e: any) {
+          console.error("Pitch deck upload catch block:", e.message);
+          toast({ title: 'Pitch Deck Upload Failed', description: e.message + ". Continuing...", variant: 'destructive' });
+        }
+      }
+
+      const payload = {
+        entrepreneur_id: userId,
+        student_name: profile?.full_name || user?.user_metadata?.full_name || 'Entrepreneur',
+        university: profile?.school_name || 'University',
+        name: f.name.trim(),
+        description: f.description.trim(),
+        category: f.category,
+        funding_goal: goal,
+        interest_rate: f.interest_rate && !isNaN(parseFloat(f.interest_rate)) ? parseFloat(f.interest_rate) : 0,
+        duration_days: f.duration_days && !isNaN(parseInt(f.duration_days)) ? parseInt(f.duration_days) : 0,
+        risk_level: f.risk_level || 'pending',
+        image: imageUrl,
+        pitch_deck_url: pitchDeckUrl,
+        tagline: f.tagline.trim() || null,
+        problem_statement: f.problem_statement.trim() || null,
+        solution: f.solution.trim() || null,
+        business_website: f.business_website.trim() || null,
+        whatsapp_number: f.whatsapp_number.trim() || null,
+        monthly_revenue: f.monthly_revenue && !isNaN(parseFloat(f.monthly_revenue)) ? parseFloat(f.monthly_revenue) : null,
+        profit_margin: f.profit_margin && !isNaN(parseFloat(f.profit_margin)) ? parseFloat(f.profit_margin) : null,
+        operating_since: f.operating_since || null,
+        employees: f.employees && !isNaN(parseInt(f.employees)) ? parseInt(f.employees) : 1,
+        status: 'submitted' as const,
+        submitted_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      console.log("handleVentureSubmit: Upserting payload", payload);
+      
+      const upsertWithTimeout = async () => {
+        const upsertPromise = supabase.from('ventures').upsert(payload, { onConflict: 'entrepreneur_id' }).select().single();
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error("Database save timed out after 15 seconds")), 15000)
+        );
+        return Promise.race([upsertPromise, timeoutPromise]) as Promise<{ data: any, error: any }>;
+      };
+
+      const { data, error } = await upsertWithTimeout();
+      
+      if (error) {
+        console.error("Supabase upsert error:", error);
+        throw error;
+      }
+
+      console.log("handleVentureSubmit: Success!");
+      setVenture(data as Venture);
+      setShowVentureForm(false);
+      setVentureStep(1);
+      toast({ title: 'Venture submitted! 🚀', description: 'Your proposal is now under review. We\'ll notify you shortly.' });
+    } catch (err: any) {
+      console.error("handleVentureSubmit: Catch block error:", err);
+      toast({ title: 'Submission failed', description: err.message || 'An unknown error occurred', variant: 'destructive' });
+    } finally {
+      console.log("handleVentureSubmit: Cleaning up");
+      setIsSubmittingVenture(false);
+    }
+  };
+
   const handleLogout = async () => {
     await signOut();
     navigate('/');
@@ -497,7 +928,7 @@ const StudentDashboardTemplate = () => {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="max-w-7xl mx-auto space-y-6"
+              className={`max-w-7xl mx-auto space-y-6 ${activeTab === 'business' && showVentureForm ? 'max-w-[1400px]' : ''}`}
             >
               
               {/* TAB: OVERVIEW */}
@@ -740,52 +1171,390 @@ const StudentDashboardTemplate = () => {
                 </div>
               )}
 
-              {/* TAB: BUSINESS */}
+              {/* TAB: BUSINESS — Dynamic Venture Onboarding */}
               {activeTab === "business" && (
                 <div className="space-y-6">
-                  <motion.div variants={itemVariants} className="bg-white border border-border/60 rounded-2xl p-6 shadow-sm">
-                    <h3 className="text-lg font-bold text-foreground mb-4">Business performance snapshot</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="bg-muted/30 rounded-xl p-4 text-center">
-                        <div className="text-xl font-bold text-[#1a56db]">₦1.2M</div>
-                        <div className="text-xs text-muted-foreground mt-1 font-medium">Monthly revenue</div>
+
+                  {/* ── LOADING ── */}
+                  {ventureLoading && (
+                    <motion.div variants={itemVariants} className="bg-white border border-border/60 rounded-2xl p-10 shadow-sm flex items-center justify-center">
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="w-10 h-10 border-3 border-[#1a56db]/20 border-t-[#1a56db] rounded-full animate-spin border-4" />
+                        <p className="text-sm font-medium text-muted-foreground">Loading your venture...</p>
                       </div>
-                      <div className="bg-muted/30 rounded-xl p-4 text-center">
-                        <div className="text-xl font-bold text-[#1a56db]">38%</div>
-                        <div className="text-xs text-muted-foreground mt-1 font-medium">Profit margin</div>
+                    </motion.div>
+                  )}
+
+                  {/* ── MULTI-STEP FORM ── */}
+                  {!ventureLoading && showVentureForm && (
+                    <motion.div variants={itemVariants} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white border border-border/60 rounded-2xl shadow-md overflow-hidden">
+                      {/* Step Progress Bar */}
+                      <div className="bg-[#f3f6fb] border-b border-border/60 px-6 py-4 flex items-center justify-between">
+                        <button onClick={() => { if (ventureStep > 1) setVentureStep(s => s - 1); else setShowVentureForm(false); }} className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-foreground transition-colors">
+                          <ChevronLeft className="w-4 h-4" /> {ventureStep === 1 ? 'Cancel' : 'Back'}
+                        </button>
+                        <div className="flex items-center gap-2">
+                          {[1,2,3].map(s => (
+                            <div key={s} className={`h-2 rounded-full transition-all duration-300 ${s <= ventureStep ? 'bg-[#1a56db] w-8' : 'bg-slate-200 w-4'}`} />
+                          ))}
+                        </div>
                       </div>
-                      <div className="bg-muted/30 rounded-xl p-4 text-center">
-                        <div className="text-xl font-bold text-[#1a56db]">+22%</div>
-                        <div className="text-xs text-muted-foreground mt-1 font-medium">MoM growth</div>
+
+                      {/* Form Content */}
+                      <div className="p-8">
+                        <AnimatePresence mode="wait">
+                          {/* ── STEP 1: Business Identity ── */}
+                          {ventureStep === 1 && (
+                            <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
+                              <div className="flex flex-col lg:flex-row gap-8">
+                                <div className="flex-1 space-y-6">
+                                  <div>
+                                    <h3 className="text-xl font-black text-foreground flex items-center gap-2 transition-all group">
+                                      <Store className="w-5 h-5 text-[#1a56db] group-hover:scale-110 transition-transform" /> 
+                                      Business Identity
+                                    </h3>
+                                    <p className="text-sm text-muted-foreground font-medium mt-1">Tell us who you are and what you do.</p>
+                                  </div>
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-1.5 sm:col-span-2">
+                                      <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Business Name <span className="text-red-500">*</span></label>
+                                      <input value={ventureForm.name} onChange={e => setVentureForm({...ventureForm, name: e.target.value})} placeholder="e.g. EcoSnacks Campus" className="w-full px-4 py-3 rounded-xl border border-border/60 bg-white/50 focus:outline-none focus:ring-2 focus:ring-[#1a56db]/40 text-sm font-medium transition-all" />
+                                    </div>
+                                    <div className="space-y-1.5 sm:col-span-2">
+                                      <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Tagline</label>
+                                      <input value={ventureForm.tagline} onChange={e => setVentureForm({...ventureForm, tagline: e.target.value})} placeholder="One catchy line about your business" className="w-full px-4 py-3 rounded-xl border border-border/60 bg-white/50 focus:outline-none focus:ring-2 focus:ring-[#1a56db]/40 text-sm font-medium transition-all" />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                      <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Category <span className="text-red-500">*</span></label>
+                                      <select value={ventureForm.category} onChange={e => setVentureForm({...ventureForm, category: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-border/60 bg-white/50 focus:outline-none focus:ring-2 focus:ring-[#1a56db]/40 text-sm font-medium transition-all">
+                                        <option value="">Select category...</option>
+                                        {VENTURE_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                      </select>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                      <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Operating Since</label>
+                                      <input type="date" value={ventureForm.operating_since} onChange={e => setVentureForm({...ventureForm, operating_since: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-border/60 bg-white/50 focus:outline-none focus:ring-2 focus:ring-[#1a56db]/40 text-sm font-medium transition-all" />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                      <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Team Size</label>
+                                      <input type="number" min="1" value={ventureForm.employees} onChange={e => setVentureForm({...ventureForm, employees: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-border/60 bg-white/50 focus:outline-none focus:ring-2 focus:ring-[#1a56db]/40 text-sm font-medium transition-all" />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                      <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">WhatsApp Contact</label>
+                                      <input type="tel" value={ventureForm.whatsapp_number} onChange={e => setVentureForm({...ventureForm, whatsapp_number: e.target.value})} placeholder="e.g. 08012345678" className="w-full px-4 py-3 rounded-xl border border-border/60 bg-white/50 focus:outline-none focus:ring-2 focus:ring-[#1a56db]/40 text-sm font-medium transition-all" />
+                                    </div>
+                                  </div>
+                                  <button onClick={() => {
+                                    if (!ventureForm.name.trim() || !ventureForm.category) { toast({ title: 'Required fields missing', description: 'Enter a business name and select a category.', variant: 'destructive' }); return; }
+                                    setVentureStep(2);
+                                  }} className="w-full py-4 bg-[#1a56db] text-white font-bold rounded-xl hover:bg-[#1a56db]/90 transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 group">
+                                    Next: The Pitch <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                  </button>
+                                </div>
+                                <div className="hidden lg:block w-80 shrink-0">
+                                  <VenturePreviewCard form={ventureForm} profile={profile} step={1} />
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+
+                          {/* ── STEP 2: The Pitch ── */}
+                          {ventureStep === 2 && (
+                            <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
+                              <div className="flex flex-col lg:flex-row gap-8">
+                                <div className="flex-1 space-y-6">
+                                  <div>
+                                    <h3 className="text-xl font-black text-foreground flex items-center gap-2 transition-all"><Layers className="w-5 h-5 text-[#1a56db]" /> The Pitch</h3>
+                                    <p className="text-sm text-muted-foreground font-medium mt-1">Describe your venture. This is what investors will read on your listing card.</p>
+                                  </div>
+                                  <div className="space-y-4">
+                                    <div className="space-y-1.5">
+                                      <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Short Description <span className="text-red-500">*</span> <span className="normal-case font-medium text-muted-foreground/70">(shown to investors)</span></label>
+                                      <textarea rows={3} value={ventureForm.description} onChange={e => setVentureForm({...ventureForm, description: e.target.value})} placeholder="In 1-3 sentences, what does your business do and why does it matter?" className="w-full px-4 py-3 rounded-xl border border-border/60 bg-white/50 focus:outline-none focus:ring-2 focus:ring-[#1a56db]/40 text-sm font-medium resize-none transition-all" />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                      <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Problem Statement</label>
+                                      <textarea rows={2} value={ventureForm.problem_statement} onChange={e => setVentureForm({...ventureForm, problem_statement: e.target.value})} placeholder="What problem are you solving?" className="w-full px-4 py-3 rounded-xl border border-border/60 bg-white/50 focus:outline-none focus:ring-2 focus:ring-[#1a56db]/40 text-sm font-medium resize-none transition-all" />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                      <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Your Solution</label>
+                                      <textarea rows={2} value={ventureForm.solution} onChange={e => setVentureForm({...ventureForm, solution: e.target.value})} placeholder="How does your product/service solve it?" className="w-full px-4 py-3 rounded-xl border border-border/60 bg-white/50 focus:outline-none focus:ring-2 focus:ring-[#1a56db]/40 text-sm font-medium resize-none transition-all" />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                      <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Business Website / Link</label>
+                                      <input type="url" value={ventureForm.business_website} onChange={e => setVentureForm({...ventureForm, business_website: e.target.value})} placeholder="https://yourbusiness.com or Instagram link" className="w-full px-4 py-3 rounded-xl border border-border/60 bg-white/50 focus:outline-none focus:ring-2 focus:ring-[#1a56db]/40 text-sm font-medium transition-all" />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                      <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Product / Business Image <span className="normal-case font-medium text-muted-foreground/70">(shown on investor card)</span></label>
+                                      <div className="border-2 border-dashed border-border/40 rounded-xl p-6 text-center hover:bg-white/50 hover:border-[#1a56db]/50 transition-all group">
+                                        <input type="file" accept="image/*" className="hidden" id="venture_image_upload" onChange={e => {
+                                          const file = e.target.files?.[0];
+                                          if (file) {
+                                            setProductImageFile(file);
+                                            // Real-time local preview update
+                                            const url = URL.createObjectURL(file);
+                                            setPreviewImageUrl(url);
+                                          }
+                                        }} />
+                                        <label htmlFor="venture_image_upload" className="cursor-pointer flex flex-col items-center gap-2">
+                                          <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-[#1a56db] group-hover:text-white transition-all">
+                                            <Upload className="w-5 h-5" />
+                                          </div>
+                                          <span className="text-sm font-bold text-[#1a56db] hover:underline">
+                                            {productImageFile ? productImageFile.name : (venture?.image ? '✅ Image already uploaded — click to replace' : 'Click to upload product image')}
+                                          </span>
+                                          <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">JPG, PNG, WebP (Max 2MB)</span>
+                                        </label>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <button onClick={() => {
+                                    if (!ventureForm.description.trim()) { toast({ title: 'Description required', description: 'Add a short description for investors.', variant: 'destructive' }); return; }
+                                    setVentureStep(3);
+                                  }} className="w-full py-4 bg-[#1a56db] text-white font-bold rounded-xl hover:bg-[#1a56db]/90 transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 group">
+                                    Next: Financials <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                  </button>
+                                </div>
+                                <div className="hidden lg:block w-80 shrink-0">
+                                  <VenturePreviewCard form={ventureForm} profile={profile} step={2} localImage={previewImageUrl} />
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+
+                          {/* ── STEP 3: Financials & Investment Terms ── */}
+                          {ventureStep === 3 && (
+                            <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
+                              <div className="flex flex-col lg:flex-row gap-8">
+                                <div className="flex-1 space-y-6">
+                                  <div>
+                                    <h3 className="text-xl font-black text-foreground flex items-center gap-2 transition-all"><TrendingUp className="w-5 h-5 text-[#1a56db]" /> Financials & Investment Terms</h3>
+                                    <p className="text-sm text-muted-foreground font-medium mt-1">These figures will appear on your investor marketplace listing.</p>
+                                  </div>
+
+                                  {/* KYC Warning */}
+                                  {(!profile?.kyc_status || profile.kyc_status === 'pending') && (
+                                    <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-[#fef3c7] border border-[#d97706]/40 rounded-xl p-4 flex items-start gap-3">
+                                      <Lock className="w-5 h-5 text-[#d97706] flex-shrink-0 mt-0.5" />
+                                      <div>
+                                        <p className="text-sm font-bold text-[#b45309]">KYC Required to Submit</p>
+                                        <p className="text-xs text-[#92400e] mt-0.5">You can save a draft, but submitting requires KYC verification. <button onClick={() => setActiveTab('credit')} className="underline font-black hover:text-[#b45309] transition-colors">Complete KYC →</button></p>
+                                      </div>
+                                    </motion.div>
+                                  )}
+
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-1.5 sm:col-span-2">
+                                      <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Funding Goal (₦) <span className="text-red-500">*</span> <span className="normal-case font-medium text-muted-foreground/70">₦50,000 – ₦300,000</span></label>
+                                      <input type="number" min="50000" max="300000" value={ventureForm.funding_goal} onChange={e => setVentureForm({...ventureForm, funding_goal: e.target.value})} placeholder="e.g. 150000" className="w-full px-4 py-3 rounded-xl border border-border/60 bg-white/50 focus:outline-none focus:ring-2 focus:ring-[#1a56db]/40 text-sm font-medium transition-all" />
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                      <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Monthly Revenue (₦)</label>
+                                      <input type="number" min="0" value={ventureForm.monthly_revenue} onChange={e => setVentureForm({...ventureForm, monthly_revenue: e.target.value})} placeholder="e.g. 80000" className="w-full px-4 py-3 rounded-xl border border-border/60 bg-white/50 focus:outline-none focus:ring-2 focus:ring-[#1a56db]/40 text-sm font-medium transition-all" />
+                                    </div>
+                                    <div className="space-y-1.5 sm:col-span-2">
+                                      <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Pitch Deck (PDF — Optional)</label>
+                                      <div className="border-2 border-dashed border-border/40 rounded-xl p-6 text-center hover:bg-white/50 hover:border-[#1a56db]/50 transition-all group">
+                                        <input type="file" accept=".pdf" className="hidden" id="pitch_deck_upload" onChange={e => setPitchDeckFile(e.target.files?.[0] || null)} />
+                                        <label htmlFor="pitch_deck_upload" className="cursor-pointer flex flex-col items-center gap-2">
+                                          <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-[#1a56db] group-hover:text-white transition-all">
+                                            <FileText className="w-5 h-5" />
+                                          </div>
+                                          <span className="text-sm font-bold text-[#1a56db] hover:underline">
+                                            {pitchDeckFile ? pitchDeckFile.name : (venture?.pitch_deck_url ? '✅ Pitch deck uploaded — click to replace' : 'Click to upload pitch deck PDF')}
+                                          </span>
+                                        </label>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                                    <button 
+                                      onClick={() => {
+                                        console.log("Saving draft...");
+                                        handleSaveDraft();
+                                      }} 
+                                      disabled={isSubmittingVenture} 
+                                      className="flex-1 py-4 border-2 border-[#1a56db] text-[#1a56db] font-extrabold rounded-xl hover:bg-[#e8f0fe]/80 transition-all disabled:opacity-50 text-xs uppercase tracking-widest"
+                                    >
+                                      {isSubmittingVenture ? 'Processing...' : 'Save as Draft'}
+                                    </button>
+                                    <div className="flex-1 flex flex-col gap-1">
+                                      <button
+                                        onClick={() => {
+                                          console.log("Submit for Review clicked");
+                                          if (!profile?.kyc_status || profile.kyc_status === 'pending') {
+                                            toast({ title: 'KYC Required 🔒', description: 'Complete your KYC first to submit to marketplace.', variant: 'destructive' });
+                                            return;
+                                          }
+                                          handleVentureSubmit();
+                                        }}
+                                        disabled={isSubmittingVenture}
+                                        className={`w-full py-4 font-extrabold rounded-xl transition-all shadow-xl flex items-center justify-center gap-2 text-xs uppercase tracking-widest ${
+                                          (!profile?.kyc_status || profile.kyc_status === 'pending') 
+                                          ? 'bg-slate-200 text-slate-500 cursor-not-allowed border border-slate-300 shadow-none' 
+                                          : 'bg-[#1a56db] text-white hover:bg-[#1a56db]/90 shadow-blue-500/30'
+                                        }`}
+                                      >
+                                        {isSubmittingVenture ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Send className="w-4 h-4" /> Submit for Review</>}
+                                      </button>
+                                      {(!profile?.kyc_status || profile.kyc_status === 'pending') && (
+                                        <p className="text-[10px] text-orange-600 font-bold text-center animate-pulse italic">KYC is required for marketplace listing</p>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="hidden lg:block w-80 shrink-0">
+                                  <VenturePreviewCard form={ventureForm} profile={profile} step={3} localImage={previewImageUrl} />
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+
+                        </AnimatePresence>
                       </div>
-                      <div className="bg-muted/30 rounded-xl p-4 text-center">
-                        <div className="text-xl font-bold text-[#1a56db]">4.7/5</div>
-                        <div className="text-xs text-muted-foreground mt-1 font-medium">Investor rating</div>
+                    </motion.div>
+                  )}
+
+                  {/* ── NO VENTURE YET — CTA ── */}
+                  {!ventureLoading && !showVentureForm && !venture && (
+                    <motion.div variants={itemVariants} className="bg-gradient-to-br from-[#1a56db] to-blue-700 rounded-[2.5rem] p-10 text-white text-center relative overflow-hidden shadow-2xl shadow-blue-500/20">
+                      <div className="absolute -right-12 -bottom-12 opacity-10 pointer-events-none"><Sparkles size={220} /></div>
+                      <div className="relative z-10">
+                        <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-4xl mx-auto mb-5">🚀</div>
+                        <h3 className="text-2xl font-black tracking-tight mb-2">Launch Your Venture</h3>
+                        <p className="text-blue-100 font-medium text-sm max-w-sm mx-auto leading-relaxed mb-8">
+                          Submit your business proposal and get it in front of hundreds of alumni and community investors on the StudentBIZ marketplace.
+                        </p>
+                        <button
+                          onClick={() => { setShowVentureForm(true); setVentureStep(1); }}
+                          className="bg-white text-[#1a56db] font-black text-xs uppercase tracking-[0.15em] px-10 py-4 rounded-full shadow-xl hover:-translate-y-1 transition-all flex items-center gap-2 mx-auto"
+                        >
+                          <PlusCircle className="w-4 h-4" /> Start Your Pitch
+                        </button>
                       </div>
-                    </div>
-                  </motion.div>
-                  
-                  <motion.div variants={itemVariants} className="bg-white border border-border/60 rounded-2xl p-6 shadow-sm">
-                    <h3 className="text-lg font-bold text-foreground mb-4">Business details</h3>
-                    <div className="space-y-0 divide-y divide-border/40">
-                      <div className="flex justify-between py-3 text-sm">
-                        <span className="text-muted-foreground font-medium">Business name</span>
-                        <span className="text-foreground font-bold">Adaeze's Accessories</span>
-                      </div>
-                      <div className="flex justify-between py-3 text-sm">
-                        <span className="text-muted-foreground font-medium">Category</span>
-                        <span className="text-foreground font-bold">Fashion & retail</span>
-                      </div>
-                      <div className="flex justify-between py-3 text-sm">
-                        <span className="text-muted-foreground font-medium">Operating since</span>
-                        <span className="text-foreground font-bold">March 2024</span>
-                      </div>
-                      <div className="flex justify-between py-3 text-sm">
-                        <span className="text-muted-foreground font-medium">Location</span>
-                        <span className="text-foreground font-bold">Lagos, Nigeria</span>
-                      </div>
-                    </div>
-                  </motion.div>
+                    </motion.div>
+                  )}
+
+                  {/* ── VENTURE EXISTS — Status Cards ── */}
+                  {!ventureLoading && !showVentureForm && venture && (
+                    <>
+                      {/* Header card with venture info + status badge */}
+                      <motion.div variants={itemVariants} className="bg-white border border-border/60 rounded-2xl p-6 shadow-sm">
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                          <div className="flex items-start gap-4">
+                            {venture.image
+                              ? <img src={venture.image} alt={venture.name} className="w-14 h-14 rounded-2xl object-cover border border-border/60 flex-shrink-0" />
+                              : <div className="w-14 h-14 rounded-2xl bg-[#e8f0fe] flex items-center justify-center text-2xl flex-shrink-0"><Store className="w-6 h-6 text-[#1a56db]" /></div>
+                            }
+                            <div>
+                              <h3 className="text-lg font-black text-foreground">{venture.name}</h3>
+                              {venture.tagline && <p className="text-sm text-muted-foreground font-medium">{venture.tagline}</p>}
+                              <span className="mt-1.5 inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-[#e8f0fe] text-[#1a56db]">{venture.category}</span>
+                            </div>
+                          </div>
+                          {/* Status Badge */}
+                          <div className="flex flex-col items-end gap-2">
+                            <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full ${
+                              venture.status === 'listed' ? 'bg-[#e6f4ed] text-[#1a7a4a]' :
+                              venture.status === 'rejected' ? 'bg-red-50 text-red-600' :
+                              venture.status === 'draft' ? 'bg-slate-100 text-slate-500' :
+                              'bg-[#fef3c7] text-[#d97706]'
+                            }`}>
+                              {venture.status === 'listed' ? '✅ Live on Marketplace' :
+                               venture.status === 'rejected' ? '❌ Rejected' :
+                               venture.status === 'submitted' ? '⏳ Submitted' :
+                               venture.status === 'under_review' ? '🔍 Under Review' : '📝 Draft'}
+                            </span>
+                            <button onClick={() => { setShowVentureForm(true); setVentureStep(1); }} className="text-[11px] font-bold text-[#1a56db] hover:underline flex items-center gap-1">
+                              {venture.status === 'rejected' ? '✏️ Revise & Resubmit' : '✏️ Edit Venture'}
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+
+                      {/* Rejection reason card */}
+                      {venture.status === 'rejected' && venture.rejection_reason && (
+                        <motion.div variants={itemVariants} className="bg-red-50 border border-red-200 rounded-2xl p-5">
+                          <h4 className="text-sm font-black text-red-700 mb-1 flex items-center gap-2"><AlertCircle className="w-4 h-4" /> Admin Feedback</h4>
+                          <p className="text-sm text-red-600 font-medium">{venture.rejection_reason}</p>
+                        </motion.div>
+                      )}
+
+                      {/* Submitted / Under Review — Progress timeline */}
+                      {(venture.status === 'submitted' || venture.status === 'under_review') && (
+                        <motion.div variants={itemVariants} className="bg-white border border-border/60 rounded-2xl p-6 shadow-sm">
+                          <h4 className="text-sm font-bold text-foreground mb-5">Review Progress</h4>
+                          <div className="flex items-start gap-0">
+                            {[
+                              { label: 'Submitted', done: true },
+                              { label: 'Under Review', done: venture.status === 'under_review' },
+                              { label: 'Listed on Marketplace', done: false },
+                            ].map((step, i, arr) => (
+                              <div key={i} className="flex-1 flex flex-col items-center">
+                                <div className="flex items-center w-full">
+                                  {i > 0 && <div className={`flex-1 h-0.5 ${step.done || arr[i-1].done ? 'bg-[#1a56db]' : 'bg-slate-200'}`} />}
+                                  <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-black ${
+                                    step.done ? 'bg-[#1a56db] text-white' : 'bg-slate-100 text-slate-400'
+                                  }`}>
+                                    {step.done ? <CheckCircle2 className="w-4 h-4" /> : i + 1}
+                                  </div>
+                                  {i < arr.length - 1 && <div className={`flex-1 h-0.5 ${step.done ? 'bg-[#1a56db]' : 'bg-slate-200'}`} />}
+                                </div>
+                                <span className={`text-[10px] font-bold mt-2 text-center leading-tight ${
+                                  step.done ? 'text-[#1a56db]' : 'text-slate-400'
+                                }`}>{step.label}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {/* Venture details summary */}
+                      <motion.div variants={itemVariants} className="bg-white border border-border/60 rounded-2xl p-6 shadow-sm">
+                        <h4 className="text-sm font-bold text-foreground mb-4">Venture Details</h4>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                          <div className="bg-[#e8f0fe]/60 rounded-xl p-4 text-center">
+                            <div className="text-lg font-black text-[#1a56db]">₦{venture.funding_goal?.toLocaleString()}</div>
+                            <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wide mt-1">Funding Goal</div>
+                          </div>
+                          <div className="bg-[#e6f4ed]/60 rounded-xl p-4 text-center">
+                            <div className={`text-lg font-black ${venture.interest_rate > 0 ? 'text-[#1a7a4a]' : 'text-slate-400 text-sm'}`}>{venture.interest_rate > 0 ? `${venture.interest_rate}%` : 'Pending'}</div>
+                            <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wide mt-1">Interest Rate</div>
+                          </div>
+                          <div className="bg-[#fef3c7]/60 rounded-xl p-4 text-center">
+                            <div className={`text-lg font-black ${venture.duration_days > 0 ? 'text-[#d97706]' : 'text-slate-400 text-sm'}`}>{venture.duration_days > 0 ? `${venture.duration_days} days` : 'Pending'}</div>
+                            <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wide mt-1">Loan Term</div>
+                          </div>
+                          <div className="bg-muted/30 rounded-xl p-4 text-center">
+                            <div className={`text-lg font-black capitalize ${venture.risk_level !== 'pending' ? 'text-foreground' : 'text-slate-400 text-sm'}`}>{venture.risk_level}</div>
+                            <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wide mt-1">Risk Level</div>
+                          </div>
+                          <div className="bg-muted/30 rounded-xl p-4 text-center">
+                            <div className={`text-lg font-black ${venture.monthly_revenue ? 'text-foreground' : 'text-slate-400 text-sm'}`}>{venture.monthly_revenue ? `₦${venture.monthly_revenue.toLocaleString()}` : 'Pending'}</div>
+                            <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wide mt-1">Monthly Revenue</div>
+                          </div>
+                          <div className="bg-muted/30 rounded-xl p-4 text-center">
+                            <div className={`text-lg font-black ${venture.profit_margin ? 'text-foreground' : 'text-slate-400 text-sm'}`}>{venture.profit_margin ? `${venture.profit_margin}%` : 'Pending'}</div>
+                            <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wide mt-1">Profit Margin</div>
+                          </div>
+                        </div>
+                        {venture.description && (
+                          <div className="mt-4 pt-4 border-t border-border/40">
+                            <p className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-2">Pitch</p>
+                            <p className="text-sm font-medium text-foreground leading-relaxed">{venture.description}</p>
+                          </div>
+                        )}
+                        {venture.pitch_deck_url && (
+                          <a href={venture.pitch_deck_url} target="_blank" rel="noopener noreferrer" className="mt-4 pt-4 border-t border-border/40 flex items-center gap-2 text-sm font-bold text-[#1a56db] hover:underline">
+                            <FileText className="w-4 h-4" /> View Pitch Deck
+                          </a>
+                        )}
+                      </motion.div>
+                    </>
+                  )}
+
                 </div>
               )}
 
@@ -1066,6 +1835,18 @@ const StudentDashboardTemplate = () => {
                   <motion.div variants={itemVariants} className="bg-white border text-left border-border/60 rounded-2xl p-6 shadow-sm">
                     <h3 className="text-lg font-bold text-foreground mb-6">Recent notifications</h3>
                     <div className="space-y-6">
+
+                      {/* Dynamic Admin Terms Alert */}
+                      {venture && venture.risk_level !== 'pending' && venture.interest_rate > 0 && (
+                        <div className="flex gap-4">
+                          <div className="mt-1 w-2.5 h-2.5 rounded-full bg-[#1a56db] flex-shrink-0 shadow-[0_0_8px_rgba(26,86,219,0.5)]"></div>
+                          <div>
+                            <p className="text-sm font-bold text-foreground">Admin has set your Venture's terms!</p>
+                            <p className="text-sm text-muted-foreground font-medium mt-0.5">Your pitch now shows a <span className="font-bold text-[#1a7a4a]">{venture.interest_rate}% Return Rate</span>, <span className="font-bold text-[#d97706]">{venture.duration_days} Day Loan Term</span>, and a <span className="font-bold capitalize">{venture.risk_level} Risk Level</span>.</p>
+                            <p className="text-xs text-muted-foreground font-medium mt-1">Recently</p>
+                          </div>
+                        </div>
+                      )}
                       <div className="flex gap-4">
                         <div className="mt-1 w-2.5 h-2.5 rounded-full bg-[#1a7a4a] flex-shrink-0"></div>
                         <div>
@@ -1094,7 +1875,17 @@ const StudentDashboardTemplate = () => {
                          {displayName ? displayName.substring(0, 2).toUpperCase() : "SB"}
                        </div>
                        <h3 className="text-xl font-bold text-foreground">{displayName || "Adaeze Okonkwo"}</h3>
-                       <p className="text-sm text-[#1a56db] font-medium mt-1 bg-[#e8f0fe] px-3 py-1 rounded-full">Student Entrepreneur</p>
+                                               <p className="text-sm text-[#1a56db] font-medium mt-1 bg-[#e8f0fe] px-3 py-1 rounded-full">Student Entrepreneur</p>
+                        
+                        <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
+                          {profile?.kyc_status === 'verified' && <TrustBadge type="id" />}
+                          {Number(profile?.cgpa) >= 3.5 && <TrustBadge type="academic" />}
+                          {venture && <TrustBadge type="founder" />}
+                          {(!profile?.kyc_status || profile?.kyc_status === 'pending') && (
+                            <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full">Not Verified</span>
+                          )}
+                        </div>
+
                     </div>
                     
                     {!isEditingProfile ? (

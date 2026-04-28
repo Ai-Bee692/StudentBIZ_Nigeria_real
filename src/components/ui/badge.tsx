@@ -32,7 +32,7 @@ function Badge({ className, variant, ...props }: BadgeProps) {
 
 // Risk-specific badge component
 interface RiskBadgeProps extends React.HTMLAttributes<HTMLDivElement> {
-  level: "low" | "medium" | "high";
+  level: "low" | "medium" | "high" | "pending";
 }
 
 function RiskBadge({ level, className, ...props }: RiskBadgeProps) {
@@ -40,12 +40,14 @@ function RiskBadge({ level, className, ...props }: RiskBadgeProps) {
     low: "bg-success/10 text-success border-success/20",
     medium: "bg-warning/10 text-warning border-warning/20",
     high: "bg-destructive/10 text-destructive border-destructive/20",
+    pending: "bg-muted text-muted-foreground border-border",
   };
 
   const riskLabels = {
     low: "Low Risk",
     medium: "Medium Risk",
     high: "High Risk",
+    pending: "Pending Risk",
   };
 
   return (
