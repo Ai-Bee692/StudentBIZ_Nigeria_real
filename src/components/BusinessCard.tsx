@@ -30,6 +30,8 @@ interface BusinessCardProps {
 }
 
 const BusinessCard = ({ venture, delay = 0 }: BusinessCardProps) => {
+  if (!venture) return null;
+  
   const amountRaised = venture.amount_raised || 0;
   const fundingProgress = (amountRaised / venture.funding_goal) * 100;
 

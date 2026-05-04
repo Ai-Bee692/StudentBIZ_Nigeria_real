@@ -280,6 +280,8 @@ const StudentDashboardTemplate = () => {
     pitch_deck_url: string | null;
     business_website: string | null;
     whatsapp_number: string | null;
+    milestones: { title: string; date: string; status: "completed" | "pending" }[] | null;
+    use_of_funds: string | null;
     status: "draft" | "submitted" | "under_review" | "listed" | "rejected";
     rejection_reason: string | null;
     submitted_at: string | null;
@@ -325,7 +327,10 @@ const StudentDashboardTemplate = () => {
     risk_level: "",
     monthly_revenue: "",
     profit_margin: "",
+    use_of_funds: "",
   });
+
+  const [ventureMilestones, setVentureMilestones] = useState<{ title: string; date: string; status: "completed" | "pending" }[]>([]);
 
   // Profile Edit State
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -756,7 +761,9 @@ const StudentDashboardTemplate = () => {
             risk_level: data.risk_level || "",
             monthly_revenue: String(data.monthly_revenue || ""),
             profit_margin: String(data.profit_margin || ""),
+            use_of_funds: data.use_of_funds || "",
           });
+          setVentureMilestones(data.milestones || []);
         }
       } catch (err: any) {
         console.error("Venture fetch error:", err.message);
@@ -814,6 +821,8 @@ const StudentDashboardTemplate = () => {
           : null,
         operating_since: ventureForm.operating_since || null,
         employees: ventureForm.employees ? parseInt(ventureForm.employees) : 1,
+        milestones: ventureMilestones.length > 0 ? ventureMilestones : null,
+        use_of_funds: ventureForm.use_of_funds || null,
         updated_at: new Date().toISOString(),
       };
       const { data, error } = await supabase
@@ -1026,6 +1035,8 @@ const StudentDashboardTemplate = () => {
           f.employees && !isNaN(parseInt(f.employees))
             ? parseInt(f.employees)
             : 1,
+        milestones: ventureMilestones.length > 0 ? ventureMilestones : null,
+        use_of_funds: f.use_of_funds || null,
         status: "submitted" as const,
         submitted_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -2062,6 +2073,101 @@ const StudentDashboardTemplate = () => {
                                         placeholder="e.g. 80000"
                                         className="w-full px-4 py-3 rounded-xl border border-border/60 bg-white/50 focus:outline-none focus:ring-2 focus:ring-[#1a56db]/40 text-sm font-medium transition-all"
                                       />
+                                    </div>
+
+                                    <div className="space-y-1.5 sm:col-span-2">
+                                      <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+                                        Use of Funds <span className="text-red-500">*</span>
+                                      </label>
+                                      <textarea
+                                        rows={2}
+                                        value={ventureForm.use_of_funds}
+                                        onChange={(e) =>
+                                          setVentureForm({
+                                            ...ventureForm,
+                                            use_of_funds: e.target.value,
+                                          })
+                                        }
+                                        placeholder="How will you spend the investment? (e.g. 50% Inventory, 30% Marketing, 20% Equipment)"
+                                        className="w-full px-4 py-3 rounded-xl border border-border/60 bg-white/50 focus:outline-none focus:ring-2 focus:ring-[#1a56db]/40 text-sm font-medium resize-none transition-all"
+                                      />
+                                    </div>
+
+                                    <div className="space-y-3 sm:col-span-2 pt-4 border-t border-border/40">
+                                      <div className="flex items-center justify-between">
+                                        <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+                                          Project Milestones
+                                        </label>
+                                        <button
+                                          type="button"
+                                          onClick={() =>
+                                            setVentureMilestones([
+                                              ...ventureMilestones,
+                                              {
+                                                title: "",
+                                                date: "",
+                                                status: "pending",
+                                              },
+                                            ])
+                                          }
+                                          className="text-[10px] font-black uppercase text-[#1a56db] hover:underline"
+                                        >
+                                          + Add Milestone
+                                        </button>
+                                      </div>
+                                      <div className="space-y-3">
+                                        {ventureMilestones.map((m, idx) => (
+                                          <div
+                                            key={idx}
+                                            className="flex flex-col sm:flex-row gap-2 bg-slate-50/50 p-3 rounded-xl border border-border/40 relative group"
+                                          >
+                                            <input
+                                              placeholder="Milestone title (e.g. New Inventory)"
+                                              value={m.title}
+                                              onChange={(e) => {
+                                                const newM = [
+                                                  ...ventureMilestones,
+                                                ];
+                                                newM[idx].title =
+                                                  e.target.value;
+                                                setVentureMilestones(newM);
+                                              }}
+                                              className="flex-1 bg-transparent border-none focus:ring-0 text-sm font-bold placeholder:font-medium"
+                                            />
+                                            <input
+                                              type="date"
+                                              value={m.date}
+                                              onChange={(e) => {
+                                                const newM = [
+                                                  ...ventureMilestones,
+                                                ];
+                                                newM[idx].date = e.target.value;
+                                                setVentureMilestones(newM);
+                                              }}
+                                              className="bg-transparent border-none focus:ring-0 text-xs font-bold text-slate-500"
+                                            />
+                                            <button
+                                              type="button"
+                                              onClick={() =>
+                                                setVentureMilestones(
+                                                  ventureMilestones.filter(
+                                                    (_, i) => i !== idx,
+                                                  ),
+                                                )
+                                              }
+                                              className="absolute -top-2 -right-2 bg-white shadow-md rounded-full p-1 text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
+                                            >
+                                              <X size={12} />
+                                            </button>
+                                          </div>
+                                        ))}
+                                        {ventureMilestones.length === 0 && (
+                                          <p className="text-[10px] text-center py-4 text-muted-foreground italic border-2 border-dashed border-border/20 rounded-xl">
+                                            No milestones added. Show investors
+                                            your roadmap!
+                                          </p>
+                                        )}
+                                      </div>
                                     </div>
                                     <div className="space-y-1.5 sm:col-span-2">
                                       <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">

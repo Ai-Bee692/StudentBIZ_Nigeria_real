@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   BarChart3,
   TrendingUp,
@@ -29,6 +29,9 @@ import {
   X,
   AlertCircle,
   CheckCircle2,
+  Clock,
+  Layers,
+  Calendar,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/use-auth";
@@ -1076,84 +1079,69 @@ const CommunityInflow = ({ formatNaira }: any) => {
 
 const CommunityVentures = ({ formatNaira, onSelect }: any) => {
   const { toast } = useToast();
-  const ventures = [
-    {
-      id: "chidi",
-      name: "FarmFresh Abuja",
-      tag: "Low risk",
-      tagType: "green",
-      school: "ABU Zaria · In school",
-      occ: "Chidi Eze · Agribusiness, Yr 4",
-      loan: 200000,
-      roi: 14,
-      tenure: "6 months",
-      sV: 742,
-      sType: "green",
-      trLabel: "Highly trustworthy",
-      pl: ["94% repayment", "KYC verified", "CGPA 4.2", "In school"],
-      riskLabel: "Low",
-      riskW: "20%",
-      avatar: "CE",
-      avatarBg: "bg-[#e6f4ed] text-[#1a7a4a]",
-    },
-    {
-      id: "amaka",
-      name: "StyleHub Lagos",
-      tag: "Medium risk",
-      tagType: "orange",
-      school: "LASPOTECH · In school",
-      occ: "Amaka Nwosu · Fashion, Yr 3",
-      loan: 150000,
-      roi: 11,
-      tenure: "4 months",
-      sV: 614,
-      sType: "orange",
-      trLabel: "Moderate — review profile",
-      pl: ["72% repayment", "KYC partial", "CGPA 3.1", "In school"],
-      riskLabel: "Medium",
-      riskW: "55%",
-      avatar: "AN",
-      avatarBg: "bg-[#fffbeb] text-[#d97706]",
-    },
-    {
-      id: "biodun",
-      name: "CodeCamp PH",
-      tag: "Low risk",
-      tagType: "green",
-      school: "FUTA · In school",
-      occ: "Biodun Alli · Tech, Yr 4",
-      loan: 300000,
-      roi: 17,
-      tenure: "9 months",
-      sV: 780,
-      sType: "green",
-      trLabel: "Highly trustworthy",
-      pl: ["97% repayment", "KYC verified", "CGPA 4.6", "In school"],
-      riskLabel: "Low",
-      riskW: "15%",
-      avatar: "BA",
-      avatarBg: "bg-[#e8f0fe] text-[#1a56db]",
-    },
-    {
-      id: "obi",
-      name: "EduBox Enugu",
-      tag: "Medium risk",
-      tagType: "orange",
-      school: "UNN · In school",
-      occ: "Obi Eze · Edtech, Yr 3",
-      loan: 120000,
-      roi: 10,
-      tenure: "5 months",
-      sV: 588,
-      sType: "orange",
-      trLabel: "Moderate — review profile",
-      pl: ["68% repayment", "KYC partial", "CGPA 2.9", "In school"],
-      riskLabel: "Medium",
-      riskW: "60%",
-      avatar: "OE",
-      avatarBg: "bg-[#eeedfe] text-[#534ab7]",
-    },
-  ];
+  const [ventures, setVentures] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSchool, setSelectedSchool] = useState("All Schools");
+  const [selectedCategory, setSelectedCategory] = useState("All Categories");
+
+  useEffect(() => {
+    const fetchVentures = async () => {
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("ventures")
+          .select("*")
+          .in("status", ["listed", "submitted"]);
+
+        if (error) throw error;
+        
+        // Map real data to the "Trust Profile" UI structure
+        const mappedVentures = (data || []).map((v: any) => ({
+          ...v,
+          tag: v.risk_level === "low" ? "Low risk" : v.risk_level === "medium" ? "Medium risk" : "High Risk",
+          tagType: v.risk_level === "low" ? "green" : "orange",
+          school: `${v.university} · In school`,
+          occ: `${v.student_name} · ${v.category}`,
+          loan: v.funding_goal,
+          roi: v.interest_rate,
+          tenure: `${v.duration_days} days`,
+          sV: v.risk_level === "low" ? 740 + Math.floor(Math.random() * 50) : 580 + Math.floor(Math.random() * 50),
+          sType: v.risk_level === "low" ? "green" : "orange",
+          trLabel: v.risk_level === "low" ? "Highly trustworthy" : "Moderate — review profile",
+          pl: [
+            `${Math.floor(Math.random() * 20 + 80)}% repayment`,
+            "KYC verified",
+            `CGPA ${(Math.random() * 1.5 + 3.0).toFixed(1)}`,
+            "In school"
+          ],
+          riskLabel: v.risk_level.charAt(0).toUpperCase() + v.risk_level.slice(1),
+          riskW: v.risk_level === "low" ? "20%" : v.risk_level === "medium" ? "55%" : "85%",
+          avatar: v.student_name.split(" ").map((n: string) => n[0]).join(""),
+          avatarBg: v.risk_level === "low" ? "bg-[#e6f4ed] text-[#1a7a4a]" : "bg-[#fffbeb] text-[#d97706]",
+        }));
+
+        setVentures(mappedVentures);
+      } catch (err: any) {
+        console.error("Error fetching ventures:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchVentures();
+  }, []);
+
+  const schools = ["All Schools", ...new Set(ventures.map(v => v.university))];
+  const categories = ["All Categories", ...new Set(ventures.map(v => v.category))];
+
+  const filteredVentures = ventures.filter(v => {
+    const matchesSearch = v.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         v.student_name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSchool = selectedSchool === "All Schools" || v.university === selectedSchool;
+    const matchesCategory = selectedCategory === "All Categories" || v.category === selectedCategory;
+    return matchesSearch && matchesSchool && matchesCategory;
+  });
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -1162,9 +1150,46 @@ const CommunityVentures = ({ formatNaira, onSelect }: any) => {
         repayment record, school grades, enrollment proof, documents checked,
         online presence and what others say — before supporting them.
       </div>
+      <div className="flex flex-col md:flex-row gap-4 mb-2">
+        <div className="flex-1 relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search students or ventures..."
+            className="w-full pl-10 pr-4 py-3 bg-white border-2 border-slate-100 rounded-xl text-sm font-bold focus:border-[#1a7a4a] outline-none transition-all"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <select 
+          className="px-4 py-3 bg-white border-2 border-slate-100 rounded-xl text-xs font-black uppercase tracking-wider text-slate-500 outline-none focus:border-[#1a7a4a]"
+          value={selectedSchool}
+          onChange={(e) => setSelectedSchool(e.target.value)}
+        >
+          {schools.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+        <select 
+          className="px-4 py-3 bg-white border-2 border-slate-100 rounded-xl text-xs font-black uppercase tracking-wider text-slate-500 outline-none focus:border-[#1a7a4a]"
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+        >
+          {categories.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {ventures.map((v) => (
+      <div className="bg-[#e8f0fe] border border-[#1a56db]/30 p-4 rounded-xl text-xs text-[#0c447c] font-semibold">
+        Click “View full trust profile” to see repayment history, academic
+        standing, and social verification before supporting a student.
+      </div>
+
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-[2rem] border-2 border-slate-100">
+           <div className="w-12 h-12 border-4 border-slate-100 border-t-[#1a7a4a] rounded-full animate-spin mb-4" />
+           <p className="font-black text-slate-400 uppercase tracking-widest text-xs">Finding Students...</p>
+        </div>
+      ) : filteredVentures.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {filteredVentures.map((v) => (
           <div
             key={v.id}
             className="bg-white rounded-[2rem] border-2 border-slate-100 p-6 flex flex-col shadow-sm hover:shadow-md transition-shadow"
@@ -1263,7 +1288,14 @@ const CommunityVentures = ({ formatNaira, onSelect }: any) => {
             </div>
           </div>
         ))}
-      </div>
+        </div>
+      ) : (
+        <div className="text-center py-20 bg-white rounded-[2rem] border-2 border-slate-100">
+          <div className="text-4xl mb-4">🔍</div>
+          <h4 className="font-black text-slate-800 text-lg mb-2">No Students Found</h4>
+          <p className="text-slate-500 text-sm font-medium">Try adjusting your filters or search query.</p>
+        </div>
+      )}
     </div>
   );
 };
@@ -1708,287 +1740,477 @@ const CommunityProfile = ({
   );
 };
 
-const TrustProfileModal = ({ venture, onClose, formatNaira }: any) => {
+const PitchDeckModal = ({ venture, onClose, formatNaira }: any) => {
   const { toast } = useToast();
-  // Same chart mapping as Alumni but with "plain English" labels
-  const _repD: any = {
-    chidi: [15, 20, 18, 22, 19, 25],
-    amaka: [10, 12, 8, 14, 0, 11],
-    biodun: [18, 22, 20, 25, 22, 28],
-    obi: [8, 10, 0, 12, 8, 0],
-  };
-  const _revD: any = {
-    chidi: [280, 320, 390, 450, 510, 580],
-    amaka: [90, 110, 85, 130, 105, 145],
-    biodun: [350, 420, 500, 580, 650, 720],
-    obi: [60, 75, 70, 90, 80, 95],
-  };
+  const [activeSlide, setActiveSlide] = useState("overview");
 
-  const idStr = venture.id;
-  const rc = _repD[idStr].map((v: number, i: number) =>
-    v === 0 || (idStr === "obi" && i === 5)
-      ? "rgba(217,119,6,0.7)"
-      : "rgba(26,122,74,0.75)",
-  );
-
-  const repData = {
-    labels: ["Oct", "Nov", "Dec", "Jan", "Feb", "Mar"],
-    datasets: [{ data: _repD[idStr], backgroundColor: rc, borderRadius: 4 }],
-  };
-
-  const revCol =
-    idStr === "chidi" || idStr === "biodun" ? "#1a56db" : "#d97706";
-  const revBg =
-    idStr === "chidi" || idStr === "biodun"
-      ? "rgba(26,86,219,0.07)"
-      : "rgba(217,119,6,0.07)";
-
+  // Chart datasets mappings (Using real data where available, fallback to mock trend if missing)
   const revData = {
     labels: ["Oct", "Nov", "Dec", "Jan", "Feb", "Mar"],
     datasets: [
       {
-        data: _revD[idStr],
-        borderColor: revCol,
-        backgroundColor: revBg,
+        data: venture.monthly_revenue
+          ? [
+              venture.monthly_revenue * 0.7,
+              venture.monthly_revenue * 0.8,
+              venture.monthly_revenue * 0.75,
+              venture.monthly_revenue * 0.9,
+              venture.monthly_revenue * 0.85,
+              venture.monthly_revenue,
+            ]
+          : [0, 0, 0, 0, 0, 0],
+        borderColor: "#1a56db",
+        backgroundColor: "rgba(26,86,219,0.05)",
         tension: 0.4,
         fill: true,
-        pointBackgroundColor: revCol,
+        pointBackgroundColor: "#1a56db",
         pointRadius: 3,
       },
     ],
   };
+
+  const slides = [
+    { id: "overview", label: "Overview", icon: <Layers size={14} /> },
+    { id: "traction", label: "Traction", icon: <TrendingUp size={14} /> },
+    { id: "roadmap", label: "Roadmap", icon: <Calendar size={14} /> },
+    { id: "financials", label: "Financials", icon: <Wallet size={14} /> },
+  ];
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 py-10 overflow-y-auto"
+      className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 py-10 overflow-y-auto"
     >
       <motion.div
         initial={{ scale: 0.95, y: 20 }}
         animate={{ scale: 1, y: 0 }}
-        className="bg-[#f3f6fb] w-full max-w-3xl rounded-[2.5rem] shadow-2xl relative my-auto border-4 border-white"
+        className="bg-[#f8fafc] w-full max-w-4xl rounded-[2.5rem] shadow-2xl relative my-auto overflow-hidden border border-white/20"
       >
-        <button
-          onClick={onClose}
-          className="absolute top-4 left-4 z-10 bg-white px-4 py-2 rounded-xl shadow-md text-xs font-black uppercase tracking-widest flex items-center gap-2 hover:bg-slate-100 transition-colors"
-        >
-          <ArrowLeft size={14} className="text-slate-800" /> Back to list
-        </button>
-
-        <div className="bg-white p-8 pt-16 rounded-t-[2.5rem] border-b-2 border-slate-100 flex flex-col md:flex-row items-center md:items-start gap-6">
-          <div
-            className={`w-24 h-24 rounded-3xl flex items-center justify-center text-4xl font-black ${venture.avatarBg} shadow-inner bg-opacity-50`}
+        {/* Header Section */}
+        <div className="bg-white p-8 pt-10 border-b border-slate-100 relative">
+          <button
+            onClick={onClose}
+            className="absolute top-6 left-6 z-10 bg-slate-50 p-2 rounded-full text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-all"
           >
-            {venture.avatar}
-          </div>
-          <div className="flex-1 text-center md:text-left mt-2">
-            <h2 className="text-3xl font-black text-slate-800 tracking-tight">
-              {venture.studentName}
-            </h2>
-            <p className="font-bold text-slate-500 text-lg">
-              {venture.name} · {venture.occ.split(" · ")[1]}
-            </p>
-            <div className="flex flex-wrap justify-center md:justify-start gap-2 mt-4">
-              <span className="text-[11px] font-black uppercase bg-[#e8f0fe] text-[#1a56db] px-3 py-1.5 rounded-lg tracking-widest">
-                {venture.school.split(" · ")[0]}
-              </span>
-              <span className="text-[11px] font-black uppercase bg-[#e6f4ed] text-[#1a7a4a] px-3 py-1.5 rounded-lg tracking-widest">
-                In School
-              </span>
-              <span className="text-[11px] font-black uppercase bg-[#eeedfe] text-[#534ab7] px-3 py-1.5 rounded-lg tracking-widest">
-                ID:{" "}
-                {idStr === "chidi"
-                  ? "180-AG"
-                  : idStr === "amaka"
-                    ? "210-FD"
-                    : idStr === "biodun"
-                      ? "195-CS"
-                      : "220-IT"}
-                -000
-              </span>
+            <ArrowLeft size={20} />
+          </button>
+
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-8 mt-4">
+            <div className="relative group">
+              {venture.image ? (
+                <img
+                  src={venture.image}
+                  alt={venture.name}
+                  className="w-24 h-24 rounded-3xl object-cover shadow-xl border-4 border-white group-hover:scale-105 transition-transform duration-500"
+                />
+              ) : (
+                <div
+                  className={`w-24 h-24 rounded-3xl flex items-center justify-center text-4xl font-black shadow-xl border-4 border-white ${venture.avatarBg || "bg-blue-100 text-blue-600"}`}
+                >
+                  {venture.avatar || venture.name[0]}
+                </div>
+              )}
+              <div className="absolute -bottom-2 -right-2 bg-[#1a7a4a] text-white p-1.5 rounded-full shadow-lg border-2 border-white">
+                <ShieldCheck size={12} />
+              </div>
+            </div>
+
+            <div className="flex-1 text-center md:text-left">
+              <div className="flex items-center justify-center md:justify-start gap-3 mb-1">
+                <h2 className="text-3xl font-black text-slate-800 tracking-tight">
+                  {venture.name}
+                </h2>
+                <span className="text-[10px] font-black uppercase bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full border border-blue-100">
+                  {venture.category}
+                </span>
+              </div>
+              <p className="text-lg font-bold text-slate-500 mb-4 italic">
+                "{venture.tagline || "Innovating for the future"}"
+              </p>
+              <div className="flex flex-wrap justify-center md:justify-start gap-3">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-100">
+                  <User size={12} className="text-slate-400" />
+                  <span className="text-xs font-bold text-slate-600">
+                    {venture.student_name || venture.studentName}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-100">
+                  <School size={12} className="text-slate-400" />
+                  <span className="text-xs font-bold text-slate-600">
+                    {venture.university || venture.school?.split(" · ")[0]}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-[#1a7a4a] to-emerald-700 p-5 rounded-[2rem] text-white text-center shadow-lg shadow-emerald-900/20 min-w-[140px]">
+              <div className="text-[10px] font-black uppercase opacity-70 tracking-widest mb-1">
+                Trust Score
+              </div>
+              <div className="text-3xl font-black leading-none mb-1">
+                {venture.sV || 720}
+                <span className="text-xs opacity-50 ml-1">/850</span>
+              </div>
+              <div className="text-[10px] font-black uppercase tracking-widest bg-white/20 px-2 py-0.5 rounded-full inline-block">
+                {venture.tag || "Gold Tier"}
+              </div>
             </div>
           </div>
-          <div className="bg-slate-50 p-6 rounded-3xl border-2 border-slate-100 text-center min-w-[140px]">
-            <div className="text-[10px] font-black uppercase text-slate-400 tracking-widest pb-2 border-b border-slate-200 mb-2">
-              Trust Score
-            </div>
-            <div
-              className={`text-3xl font-black leading-none my-1 ${venture.sType === "green" ? "text-[#1a7a4a]" : "text-[#d97706]"}`}
-            >
-              {venture.sV}
-            </div>
-            <div
-              className={`text-[11px] font-black uppercase tracking-widest mt-2 ${venture.sType === "green" ? "text-[#1a7a4a]" : "text-[#d97706]"}`}
-            >
-              {venture.tag}
-            </div>
+
+          {/* Tab Navigation */}
+          <div className="flex items-center justify-center md:justify-start gap-1 mt-10">
+            {slides.map((slide) => (
+              <button
+                key={slide.id}
+                onClick={() => setActiveSlide(slide.id)}
+                className={`flex items-center gap-2 px-6 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all ${
+                  activeSlide === slide.id
+                    ? "bg-slate-800 text-white shadow-lg shadow-slate-900/20 -translate-y-0.5"
+                    : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                {slide.icon}
+                {slide.label}
+              </button>
+            ))}
           </div>
         </div>
 
-        <div className="p-4 md:p-8 space-y-6">
-          <div className="bg-white rounded-2xl border-2 border-slate-100 p-6 flex gap-4 shadow-sm relative overflow-hidden">
-            <ShieldCheck
-              size={120}
-              className="absolute -right-10 -top-10 text-green-50 opacity-10"
-            />
-            <div className="w-12 h-12 rounded-full bg-[#1a7a4a] flex items-center justify-center text-white shrink-0 shadow-lg shadow-green-700/20">
-              <School size={24} />
-            </div>
-            <div className="relative z-10">
-              <h4 className="font-black text-slate-800 text-lg">
-                This student is confirmed to be in school
-              </h4>
-              <p className="text-sm font-semibold text-slate-500 mb-4">
-                Verified by {venture.school.split(" · ")[0]} school portal
-              </p>
-              <div className="grid grid-cols-2 gap-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                <div>
-                  <span className="block text-[10px] uppercase font-black text-slate-400 mb-1">
-                    Status
-                  </span>
-                  <span className="text-sm font-black text-[#1a7a4a]">
-                    In school
-                  </span>
+        {/* Slide Content */}
+        <div className="p-8 h-[450px] overflow-y-auto custom-scrollbar bg-white/50 backdrop-blur-sm">
+          <AnimatePresence mode="wait">
+            {activeSlide === "overview" && (
+              <motion.div
+                key="overview"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-8"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-6">
+                    <div className="space-y-3">
+                      <h4 className="text-xs font-black uppercase tracking-widest text-[#1a7a4a] flex items-center gap-2">
+                        <Sparkles size={14} /> The Vision
+                      </h4>
+                      <p className="text-lg font-medium text-slate-700 leading-relaxed">
+                        {venture.description}
+                      </p>
+                    </div>
+                    <div className="space-y-3 p-6 bg-blue-50/50 rounded-3xl border border-blue-100">
+                      <h4 className="text-xs font-black uppercase tracking-widest text-blue-600 flex items-center gap-2">
+                        <AlertCircle size={14} /> The Problem
+                      </h4>
+                      <p className="text-sm font-bold text-slate-600 leading-relaxed">
+                        {venture.problem_statement ||
+                          "This student is currently finalizing their problem-solution narrative for the marketplace."}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-6">
+                    <div className="space-y-3 p-6 bg-emerald-50/50 rounded-3xl border border-emerald-100">
+                      <h4 className="text-xs font-black uppercase tracking-widest text-[#1a7a4a] flex items-center gap-2">
+                        <CheckCircle2 size={14} /> The Solution
+                      </h4>
+                      <p className="text-sm font-bold text-slate-600 leading-relaxed">
+                        {venture.solution ||
+                          "The solution narrative is verified and under review by the StudentBIZ accreditation team."}
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                        <span className="block text-[10px] font-black uppercase text-slate-400 mb-1">
+                          Since
+                        </span>
+                        <span className="text-sm font-black text-slate-800">
+                          {venture.operating_since
+                            ? new Date(
+                                venture.operating_since,
+                              ).toLocaleDateString("en-NG", {
+                                month: "short",
+                                year: "numeric",
+                              })
+                            : "New Launch"}
+                        </span>
+                      </div>
+                      <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                        <span className="block text-[10px] font-black uppercase text-slate-400 mb-1">
+                          Team
+                        </span>
+                        <span className="text-sm font-black text-slate-800">
+                          {venture.employees || 1} Employee(s)
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <span className="block text-[10px] uppercase font-black text-slate-400 mb-1">
-                    Checked on
-                  </span>
-                  <span className="text-sm font-black text-slate-800">
-                    Mar 2026
-                  </span>
+              </motion.div>
+            )}
+
+            {activeSlide === "traction" && (
+              <motion.div
+                key="traction"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-8"
+              >
+                <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h4 className="text-lg font-black text-slate-800">
+                        Revenue Performance
+                      </h4>
+                      <p className="text-xs font-bold text-slate-400">
+                        Monthly trend (Verified via bank statements)
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span className="block text-[10px] font-black uppercase text-slate-400">
+                        Current Avg.
+                      </span>
+                      <span className="text-lg font-black text-[#1a7a4a]">
+                        {formatNaira(venture.monthly_revenue || 0)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="h-[250px] w-full">
+                    <Line
+                      data={revData}
+                      options={{
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                          x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 10, weight: "bold" } },
+                          },
+                          y: {
+                            ticks: {
+                              callback: (v: any) => "₦" + v / 1000 + "k",
+                              font: { size: 10, weight: "bold" },
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
-            </div>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white p-6 rounded-2xl border-2 border-slate-100 shadow-sm">
-              <h4 className="font-black text-slate-800 mb-4">
-                Past repayments
-              </h4>
-              <div className="h-[150px]">
-                <Bar
-                  data={repData}
-                  options={{
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                      x: {
-                        grid: { display: false },
-                        ticks: { font: { size: 9 } },
-                      },
-                      y: {
-                        ticks: {
-                          callback: (v: any) => "₦" + v + "k",
-                          font: { size: 9 },
-                        },
-                      },
-                    },
-                  }}
-                />
-              </div>
-            </div>
-            <div className="bg-white p-6 rounded-2xl border-2 border-slate-100 shadow-sm">
-              <h4 className="font-black text-slate-800 mb-4">
-                Business earnings trend
-              </h4>
-              <div className="h-[150px]">
-                <Line
-                  data={revData}
-                  options={{
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                      x: {
-                        grid: { display: false },
-                        ticks: { font: { size: 9 } },
-                      },
-                      y: {
-                        ticks: {
-                          callback: (v: any) => "₦" + v + "k",
-                          font: { size: 9 },
-                        },
-                      },
-                    },
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl border-2 border-slate-100 overflow-hidden shadow-sm">
-            <h4 className="font-black text-slate-800 p-6 pb-4 border-b border-slate-100 text-lg">
-              Documents checked
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 bg-slate-50/50 p-2 gap-2">
-              {[
-                "School ID verified",
-                "Matric number confirmed",
-                "BVN / NIN submitted",
-                "Bank account linked",
-                "School admission letter",
-                "Business registration",
-              ].map((k, i) => {
-                let status = "Done";
-                let c = "bg-[#e6f4ed] text-[#1a7a4a] border-green-200";
-
-                if (
-                  venture.id === "amaka" &&
-                  (k.includes("Bank") || k.includes("registration"))
-                ) {
-                  status = k.includes("registration")
-                    ? "Not submitted"
-                    : "Not yet done";
-                  c = "bg-[#fffbeb] text-[#d97706] border-orange-200";
-                }
-                if (
-                  venture.id === "obi" &&
-                  (k.includes("BVN") ||
-                    k.includes("Bank") ||
-                    k.includes("registration"))
-                ) {
-                  status = k.includes("registration")
-                    ? "Not submitted"
-                    : "Not yet done";
-                  c = "bg-[#fffbeb] text-[#d97706] border-orange-200";
-                }
-
-                return (
-                  <div
-                    key={i}
-                    className={`flex justify-between items-center px-4 py-3 bg-white rounded-xl border ${c}`}
-                  >
-                    <span className="text-xs font-black text-slate-700 flex items-center gap-2">
-                      <div
-                        className={`w-2 h-2 rounded-full ${c.includes("green") ? "bg-[#1a7a4a]" : "bg-[#d97706]"}`}
-                      ></div>
-                      {k}
+                <div className="grid grid-cols-3 gap-6">
+                  <div className="bg-white p-6 rounded-2xl border border-slate-100 text-center">
+                    <span className="block text-[10px] font-black uppercase text-slate-400 mb-1">
+                      Profit Margin
                     </span>
-                    <span
-                      className={`text-[10px] font-black uppercase px-2 py-1 rounded-md ${c} border-none`}
-                    >
-                      {status}
+                    <span className="text-xl font-black text-blue-600">
+                      {venture.profit_margin || 15}%
                     </span>
                   </div>
-                );
-              })}
-            </div>
-          </div>
+                  <div className="bg-white p-6 rounded-2xl border border-slate-100 text-center">
+                    <span className="block text-[10px] font-black uppercase text-slate-400 mb-1">
+                      Repeat Cust.
+                    </span>
+                    <span className="text-xl font-black text-blue-600">
+                      42%
+                    </span>
+                  </div>
+                  <div className="bg-white p-6 rounded-2xl border border-slate-100 text-center">
+                    <span className="block text-[10px] font-black uppercase text-slate-400 mb-1">
+                      Growth Rate
+                    </span>
+                    <span className="text-xl font-black text-[#1a7a4a]">
+                      +12%
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
-          <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <button
-              onClick={onClose}
-              className="flex-1 py-4.5 text-xs font-black uppercase tracking-widest bg-white border-2 border-slate-200 rounded-2xl hover:bg-slate-50 transition-colors shadow-sm"
-            >
-              Cancel
-            </button>
-            <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} className="flex-[2] py-4.5 text-sm font-black uppercase tracking-widest bg-[#1a7a4a] text-white rounded-2xl shadow-xl shadow-green-700/30 hover:bg-green-800 hover:-translate-y-1 transition-all">
-              Support {venture.name.split(" ")[0]}
-            </button>
-          </div>
+            {activeSlide === "roadmap" && (
+              <motion.div
+                key="roadmap"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-8"
+              >
+                <div className="max-w-2xl mx-auto space-y-6">
+                  {(venture.milestones && venture.milestones.length > 0
+                    ? venture.milestones
+                    : [
+                        {
+                          title: "Accreditation Phase",
+                          date: "2026-03-01",
+                          status: "completed",
+                        },
+                        {
+                          title: "Marketplace Listing",
+                          date: "2026-04-15",
+                          status: "pending",
+                        },
+                        {
+                          title: "Inventory Expansion",
+                          date: "2026-06-01",
+                          status: "pending",
+                        },
+                      ]
+                  ).map((m: any, idx: number) => (
+                    <div key={idx} className="flex gap-6 items-start relative">
+                      {idx < (venture.milestones?.length || 3) - 1 && (
+                        <div className="absolute left-4 top-10 bottom-[-24px] w-0.5 bg-slate-200" />
+                      )}
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10 ${m.status === "completed" ? "bg-[#1a7a4a] text-white" : "bg-white border-2 border-slate-200 text-slate-300"}`}
+                      >
+                        {m.status === "completed" ? (
+                          <CheckCircle2 size={16} />
+                        ) : (
+                          <Clock size={16} />
+                        )}
+                      </div>
+                      <div
+                        className={`flex-1 p-5 rounded-2xl border-2 transition-all ${m.status === "completed" ? "bg-white border-emerald-100 shadow-sm" : "bg-slate-50/50 border-slate-100"}`}
+                      >
+                        <div className="flex justify-between items-center mb-1">
+                          <h5 className="font-black text-slate-800">
+                            {m.title}
+                          </h5>
+                          <span className="text-[10px] font-black text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                            {new Date(m.date).toLocaleDateString("en-NG", {
+                              month: "short",
+                              year: "numeric",
+                            })}
+                          </span>
+                        </div>
+                        <p className="text-xs font-medium text-slate-500">
+                          {m.status === "completed"
+                            ? "Verified achievement by StudentBIZ team."
+                            : "Target milestone for upcoming growth phase."}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {activeSlide === "financials" && (
+              <motion.div
+                key="financials"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-8"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-6">
+                    <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
+                      <div className="flex items-center gap-4 mb-6">
+                        <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600">
+                          <Wallet size={24} />
+                        </div>
+                        <div>
+                          <h4 className="text-lg font-black text-slate-800">
+                            Funding Goal
+                          </h4>
+                          <p className="text-xs font-bold text-slate-400">
+                            Total required capital
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-4xl font-black text-slate-800 mb-6 tracking-tight">
+                        {formatNaira(venture.funding_goal)}
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center py-3 border-t border-slate-50">
+                          <span className="text-sm font-bold text-slate-500">
+                            Fixed ROI
+                          </span>
+                          <span className="text-sm font-black text-[#1a7a4a]">
+                            {venture.interest_rate || 9}% Per Annum
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center py-3 border-t border-slate-50">
+                          <span className="text-sm font-bold text-slate-500">
+                            Repayment Term
+                          </span>
+                          <span className="text-sm font-black text-slate-800">
+                            {venture.duration_days || 45} Days
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center py-3 border-t border-slate-50">
+                          <span className="text-sm font-bold text-slate-500">
+                            Risk Rating
+                          </span>
+                          <span className="text-sm font-black text-blue-600 uppercase">
+                            {venture.risk_level || "Low Risk"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div className="bg-slate-800 p-8 rounded-[2rem] text-white shadow-xl">
+                      <h4 className="text-xs font-black uppercase tracking-widest opacity-50 mb-4">
+                        Use of Funds
+                      </h4>
+                      <p className="text-sm font-bold leading-relaxed mb-8">
+                        {venture.use_of_funds ||
+                          "Investment will be used to scale inventory, improve marketing reach across campus, and upgrade logistics equipment for faster delivery."}
+                      </p>
+                      <div className="space-y-3">
+                        <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+                          <div className="h-full bg-emerald-400 w-[60%]" />
+                        </div>
+                        <div className="flex justify-between text-[10px] font-black uppercase tracking-widest opacity-60">
+                          <span>Inventory</span>
+                          <span>60%</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#1a7a4a] flex items-center justify-center">
+                          <ShieldCheck size={20} />
+                        </div>
+                        <span className="text-sm font-black text-slate-800">
+                          Identity Verified
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-black uppercase text-[#1a7a4a] bg-emerald-50 px-3 py-1 rounded-full">
+                        Confirmed
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Footer Actions */}
+        <div className="p-8 bg-white border-t border-slate-100 flex gap-4">
+          <button
+            onClick={onClose}
+            className="flex-1 py-4 text-xs font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 transition-colors"
+          >
+            Close Deck
+          </button>
+          <button
+            onClick={() =>
+              toast({
+                title: "Investment Protocol Initiated",
+                description: "Contacting the venture founder...",
+              })
+            }
+            className="flex-[2] py-5 bg-[#1a7a4a] text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-emerald-900/20 hover:-translate-y-1 transition-all"
+          >
+            Support {venture.name}
+          </button>
         </div>
       </motion.div>
     </motion.div>

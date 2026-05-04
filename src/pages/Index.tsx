@@ -17,49 +17,55 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import StatCard from "@/components/StatCard";
 import TestimonialCard from "@/components/TestimonialCard";
-import BusinessCard, { Business } from "@/components/BusinessCard";
+import BusinessCard, { Venture } from "@/components/BusinessCard";
 import heroImage from "@/assets/hero-image.jpg";
 
 // Sample businesses data
-const featuredBusinesses: Business[] = [
+const featuredBusinesses: Venture[] = [
   {
     id: "1",
+    entrepreneur_id: "e1",
     name: "EcoSnacks Campus",
     description: "Sustainable snack vending machines on university campuses, offering healthy and eco-friendly options.",
     category: "Food & Beverage",
-    fundingGoal: 5000,
-    amountRaised: 3750,
-    interestRate: 12,
-    duration: 60,
-    riskLevel: "low",
-    studentName: "Maya Chen",
-    university: "Stanford University"
+    funding_goal: 5000,
+    amount_raised: 3750,
+    interest_rate: 12,
+    duration_days: 60,
+    risk_level: "low",
+    student_name: "Maya Chen",
+    university: "Stanford University",
+    status: "listed"
   },
   {
     id: "2",
+    entrepreneur_id: "e2",
     name: "TutorMatch Pro",
     description: "AI-powered platform connecting students with peer tutors based on learning style and subject expertise.",
     category: "EdTech",
-    fundingGoal: 8000,
-    amountRaised: 4200,
-    interestRate: 15,
-    duration: 90,
-    riskLevel: "medium",
-    studentName: "James Rodriguez",
-    university: "MIT"
+    funding_goal: 8000,
+    amount_raised: 4200,
+    interest_rate: 15,
+    duration_days: 90,
+    risk_level: "medium",
+    student_name: "James Rodriguez",
+    university: "MIT",
+    status: "listed"
   },
   {
     id: "3",
+    entrepreneur_id: "e3",
     name: "Campus Thrift",
     description: "Mobile app for buying and selling second-hand textbooks and dorm essentials within university communities.",
     category: "Marketplace",
-    fundingGoal: 3000,
-    amountRaised: 2800,
-    interestRate: 10,
-    duration: 45,
-    riskLevel: "low",
-    studentName: "Sarah Kim",
-    university: "UC Berkeley"
+    funding_goal: 3000,
+    amount_raised: 2800,
+    interest_rate: 10,
+    duration_days: 45,
+    risk_level: "low",
+    student_name: "Sarah Kim",
+    university: "UC Berkeley",
+    status: "listed"
   }
 ];
 
@@ -277,7 +283,7 @@ const Index = () => {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
             {featuredBusinesses.map((business, index) => (
-              <BusinessCard key={business.id} business={business} delay={index * 0.1} />
+              <BusinessCard key={business.id} venture={business} delay={index * 0.1} />
             ))}
           </div>
 
