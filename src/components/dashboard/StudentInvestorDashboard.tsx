@@ -1,3 +1,4 @@
+import { useNavigate, Link } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import { 
   BarChart3, 
@@ -30,12 +31,14 @@ import {
   Clock,
   Layers,
   Calendar,
+  Store,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import myLogo from "@/assets/my-Logo.png";
+import BusinessDetail from "@/pages/BusinessDetail";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -85,6 +88,7 @@ const TrustBadge = ({ type }: { type: 'id' | 'investor' | 'academic' | 'alma' })
 const StudentInvestorDashboard = () => {
   const { profile, signOut } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<StudentTab>("overview");
   const [selectedVenture, setSelectedVenture] = useState<any>(null);
   const [showKycForm, setShowKycForm] = useState(false);
@@ -798,6 +802,8 @@ const StudentVentures = ({ formatNaira, onSelect }: any) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSchool, setSelectedSchool] = useState("All Schools");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const [selectedRisk, setSelectedRisk] = useState("All Risks");
+  const [selectedROI, setSelectedROI] = useState("All ROI");
 
   useEffect(() => {
     const fetchVentures = async () => {
@@ -842,7 +848,17 @@ const StudentVentures = ({ formatNaira, onSelect }: any) => {
                          v.studentName.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesSchool = selectedSchool === "All Schools" || v.university === selectedSchool;
     const matchesCategory = selectedCategory === "All Categories" || v.category === selectedCategory;
-    return matchesSearch && matchesSchool && matchesCategory;
+    const matchesRisk = selectedRisk === "All Risks" || v.risk_level === selectedRisk.toLowerCase();
+    
+    let matchesROI = true;
+    if (selectedROI !== "All ROI") {
+      const roi = parseFloat(v.roi);
+      if (selectedROI === "Up to 10%") matchesROI = roi <= 10;
+      else if (selectedROI === "10% - 15%") matchesROI = roi > 10 && roi <= 15;
+      else if (selectedROI === "15%+") matchesROI = roi > 15;
+    }
+
+    return matchesSearch && matchesSchool && matchesCategory && matchesRisk && matchesROI;
   });
 
   return (
@@ -872,6 +888,26 @@ const StudentVentures = ({ formatNaira, onSelect }: any) => {
         >
           {categories.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
+        <select 
+          className="px-4 py-3 bg-white border-2 border-slate-100 rounded-xl text-xs font-black uppercase tracking-wider text-slate-500 outline-none focus:border-[#534ab7]"
+          value={selectedRisk}
+          onChange={(e) => setSelectedRisk(e.target.value)}
+        >
+          <option value="All Risks">All Risks</option>
+          <option value="Low">Low Risk</option>
+          <option value="Medium">Medium Risk</option>
+          <option value="High">High Risk</option>
+        </select>
+        <select 
+          className="px-4 py-3 bg-white border-2 border-slate-100 rounded-xl text-xs font-black uppercase tracking-wider text-slate-500 outline-none focus:border-[#534ab7]"
+          value={selectedROI}
+          onChange={(e) => setSelectedROI(e.target.value)}
+        >
+          <option value="All ROI">All ROI</option>
+          <option value="Up to 10%">Up to 10%</option>
+          <option value="10% - 15%">10% - 15%</option>
+          <option value="15%+">15%+</option>
+        </select>
       </div>
 
       {isLoading ? (
@@ -882,61 +918,113 @@ const StudentVentures = ({ formatNaira, onSelect }: any) => {
       ) : filteredVentures.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {filteredVentures.map((v) => (
-        <div key={v.id} className="bg-white rounded-2xl border border-black/5 p-4 shadow-sm">
-          <div className="flex justify-between items-start mb-1">
-            <h4 className="font-black text-slate-800 text-sm tracking-tight">{v.name}</h4>
-            <span className="text-[9px] font-black bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md uppercase">
-              {v.risk} RISK
-            </span>
-          </div>
-          <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-4">
-             {v.university} &middot; {v.studentName} ({v.year})
-          </p>
-          
-          <div className="grid grid-cols-3 gap-2 mb-4 bg-slate-50/50 p-3 rounded-xl">
-             <div>
-               <p className="text-[8px] text-slate-400 font-black uppercase tracking-tighter">Goal</p>
-               <p className="text-xs font-black text-slate-800">₦{v.loanGoal/1000}k</p>
-             </div>
-             <div>
-               <p className="text-[8px] text-slate-400 font-black uppercase tracking-tighter">ROI</p>
-               <p className="text-xs font-black text-green-600">{v.roi}%</p>
-             </div>
-             <div>
-               <p className="text-[8px] text-slate-400 font-black uppercase tracking-tighter">Tenure</p>
-               <p className="text-xs font-black text-slate-800">{v.tenure}</p>
-             </div>
-          </div>
+            <div key={v.id} className="bg-white rounded-xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-md transition-all group h-full flex flex-col">
+              {/* Image / Gradient */}
+              <div className="relative h-48 bg-gradient-to-br from-[#3b82f6] to-[#2dd4bf] overflow-hidden shrink-0">
+                {v.image ? (
+                  <img
+                    src={v.image}
+                    alt={v.name}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-7xl font-bold text-white/30">
+                      {v.name ? v.name.charAt(0).toUpperCase() : "V"}
+                    </span>
+                  </div>
+                )}
+                <div className="absolute top-4 left-4">
+                  <span className="bg-white text-slate-800 text-[11px] font-semibold px-3 py-1 rounded-full shadow-sm">
+                    {v.category || "Category"}
+                  </span>
+                </div>
+                <div className="absolute top-4 right-4">
+                  <span
+                    className={`text-xs font-bold px-3 py-1.5 rounded-full bg-slate-900/40 backdrop-blur-md border border-white/10 shadow-sm ${
+                      v.risk_level === "low"
+                        ? "text-[#4ade80]" // Emerald 400
+                        : v.risk_level === "high"
+                        ? "text-[#f87171]" // Red 400
+                        : "text-[#fbbf24]" // Amber 400
+                    }`}
+                  >
+                    {v.risk_level
+                      ? `${v.risk_level.charAt(0).toUpperCase() + v.risk_level.slice(1)} Risk`
+                      : "Risk Level"}
+                  </span>
+                </div>
+              </div>
 
-          <div className="flex items-center gap-3 mb-4 px-2">
-            <div className="w-10 h-10 rounded-full border-2 border-[#534ab7]/20 flex flex-col items-center justify-center bg-white">
-               <span className="text-[11px] font-black text-[#534ab7] leading-none">{v.creditScore}</span>
-               <span className="text-[6px] text-slate-300 font-bold tracking-widest">/850</span>
-            </div>
-            <div className="flex-1">
-               <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-[#534ab7] mb-1">
-                  <span>Trust Score</span>
-                  <span>{v.creditScore > 700 ? 'High' : 'Med'}</span>
-               </div>
-               <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-[#534ab7]" style={{ width: `${(v.creditScore/850)*100}%` }} />
-               </div>
-            </div>
-          </div>
+              {/* Content */}
+              <div className="p-5 flex flex-col flex-1">
+                <div className="mb-4">
+                  <h3 className="font-bold text-[17px] text-slate-800 mb-1.5 line-clamp-1">
+                    {v.name}
+                  </h3>
+                  <p className="text-[13px] text-slate-500 leading-relaxed line-clamp-2">
+                    {v.description || "No description provided."}
+                  </p>
+                </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <button 
-              onClick={() => onSelect(v)}
-              className="py-2.5 text-[9px] font-black uppercase tracking-widest text-[#534ab7] bg-[#eeedfe] rounded-xl hover:bg-[#534ab7]/10 transition-all"
-            >
-              Verify Profile
-            </button>
-            <button onClick={() => toast({ title: "Feature in development", description: "This action will be available soon!" })} className="py-2.5 text-[9px] font-black uppercase tracking-widest bg-[#534ab7] text-white rounded-xl shadow-lg shadow-[#534ab7]/20">
-              Fund Peer
-            </button>
-          </div>
-        </div>
-        ))}
+                {/* Funding Progress */}
+                <div className="mb-5 mt-auto">
+                  <div className="flex justify-between text-xs mb-2">
+                    <span className="text-slate-500 font-medium">Raised</span>
+                    <span className="font-bold text-slate-800">
+                      ₦{(v.amount_raised || 0).toLocaleString()} / ₦{(v.funding_goal || v.loanGoal || 0).toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-[#10b981] rounded-full"
+                      style={{
+                        width: `${Math.min(
+                          ((v.amount_raised || 0) / (v.funding_goal || v.loanGoal || 1)) * 100,
+                          100
+                        )}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-3 gap-2.5 mb-5">
+                  <div className="bg-[#f8fafc] rounded-xl p-3 text-center border border-slate-100 flex flex-col items-center">
+                    <TrendingUp className="w-4 h-4 text-[#10b981] mb-1" />
+                    <span className="font-bold text-[13px] text-slate-800">
+                      {v.interest_rate || v.roi}%
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-medium">Return</span>
+                  </div>
+                  <div className="bg-[#f8fafc] rounded-xl p-3 text-center border border-slate-100 flex flex-col items-center">
+                    <Clock className="w-4 h-4 text-[#3b82f6] mb-1" />
+                    <span className="font-bold text-[13px] text-slate-800">
+                      {v.duration_days || v.tenure?.replace(' days', '') || 0}
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-medium">Days</span>
+                  </div>
+                  <div className="bg-[#f8fafc] rounded-xl p-3 text-center border border-slate-100 flex flex-col items-center">
+                    <Target className="w-4 h-4 text-[#2563eb] mb-1" />
+                    <span className="font-bold text-[13px] text-slate-800">
+                      {Math.round(
+                        Math.min(((v.amount_raised || 0) / (v.funding_goal || v.loanGoal || 1)) * 100, 100)
+                      )}%
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-medium">Funded</span>
+                  </div>
+                </div>
+
+                <Link to={`/businesses/${v.id}`} className="block mt-auto">
+                  <button 
+                    className="w-full py-2.5 bg-[#0066FF] text-white font-semibold text-[13px] rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                  >
+                    View Details
+                  </button>
+                </Link>
+              </div>
+            </div>
+          ))}
         </div>
       ) : (
         <div className="col-span-full text-center py-20 bg-white rounded-2xl border-2 border-slate-100">
@@ -1062,7 +1150,7 @@ const StudentNotifications = () => {
   );
 };
 
-const StudentProfile = ({ 
+function StudentProfile({ 
   profile, 
   isEditing, 
   setIsEditing, 
@@ -1071,7 +1159,7 @@ const StudentProfile = ({
   setEditForm, 
   startEditing, 
   onUpdate 
-}: any) => {
+}: any) {
   const { toast } = useToast();
   const displayName = profile?.full_name || "Student Investor";
   return (
@@ -1299,7 +1387,7 @@ const StudentProfile = ({
   );
 };
 
-const PitchDeckModal = ({ venture, onClose, formatNaira }: any) => {
+function VentureModal({ venture, onClose, formatNaira, type }: any) {
   const { toast } = useToast();
   const [activeSlide, setActiveSlide] = useState("overview");
 
@@ -1776,7 +1864,7 @@ const PitchDeckModal = ({ venture, onClose, formatNaira }: any) => {
   );
 };
 
-const StudentKYC = ({ 
+function StudentKYC({ 
   profile, 
   showForm, 
   setShowForm, 
@@ -1785,7 +1873,7 @@ const StudentKYC = ({
   setFormData, 
   onSubmit, 
   setFile 
-}: any) => {
+}: any) {
   const { toast } = useToast();
   return (
     <div className="max-w-4xl mx-auto space-y-8">

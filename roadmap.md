@@ -14,10 +14,10 @@ This document outlines the five phases of development for the StudentBIZ Nigeria
 - [x] **Venture Onboarding**: Implementing the business proposal submission flow for student entrepreneurs.
 
 
-## Phase 3: Marketplace Discovery & Peer Check-in
-- [ ] **Investor Marketplace**: High-fidelity discovery engine for Alumni/Community investors.
-- [ ] **Advanced Filtering**: Searching by school, category, ROI, and risk level.
-- [ ] **Pitch Deck Interactive**: Deep-dive views with founder narratives and project milestones.
+## Phase 3: Marketplace Discovery & Peer Check-in [COMPLETED]
+- [x] **Investor Marketplace**: High-fidelity discovery engine for Alumni/Community investors.
+- [x] **Advanced Filtering**: Searching by school, category, ROI, and risk level.
+- [x] **Pitch Deck Interactive**: Deep-dive views with founder narratives and project milestones.
 
 ## Phase 4: Investment Lifecycle & Financial Analytics
 - [ ] **ROI Tracking**: Real-time performance metrics and charts for investor portfolios.

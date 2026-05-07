@@ -280,7 +280,9 @@ const StudentDashboardTemplate = () => {
     pitch_deck_url: string | null;
     business_website: string | null;
     whatsapp_number: string | null;
-    milestones: { title: string; date: string; status: "completed" | "pending" }[] | null;
+    milestones:
+      | { title: string; date: string; status: "completed" | "pending" }[]
+      | null;
     use_of_funds: string | null;
     status: "draft" | "submitted" | "under_review" | "listed" | "rejected";
     rejection_reason: string | null;
@@ -330,7 +332,9 @@ const StudentDashboardTemplate = () => {
     use_of_funds: "",
   });
 
-  const [ventureMilestones, setVentureMilestones] = useState<{ title: string; date: string; status: "completed" | "pending" }[]>([]);
+  const [ventureMilestones, setVentureMilestones] = useState<
+    { title: string; date: string; status: "completed" | "pending" }[]
+  >([]);
 
   // Profile Edit State
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -2077,7 +2081,8 @@ const StudentDashboardTemplate = () => {
 
                                     <div className="space-y-1.5 sm:col-span-2">
                                       <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">
-                                        Use of Funds <span className="text-red-500">*</span>
+                                        Use of Funds{" "}
+                                        <span className="text-red-500">*</span>
                                       </label>
                                       <textarea
                                         rows={2}
