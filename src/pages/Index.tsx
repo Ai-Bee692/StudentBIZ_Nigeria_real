@@ -1,17 +1,17 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { 
-  ArrowRight, 
-  GraduationCap, 
-  Users, 
-  TrendingUp, 
-  Shield, 
-  Wallet, 
+import {
+  ArrowRight,
+  GraduationCap,
+  Users,
+  TrendingUp,
+  Shield,
+  Wallet,
   CheckCircle,
   DollarSign,
   PieChart,
-  Clock
+  Clock,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -26,77 +26,83 @@ const featuredBusinesses: Venture[] = [
     id: "1",
     entrepreneur_id: "e1",
     name: "EcoSnacks Campus",
-    description: "Sustainable snack vending machines on university campuses, offering healthy and eco-friendly options.",
+    description:
+      "Sustainable snack vending machines on university campuses, offering healthy and eco-friendly options.",
     category: "Food & Beverage",
-    funding_goal: 5000,
-    amount_raised: 3750,
+    funding_goal: 250000,
+    amount_raised: 37500,
     interest_rate: 12,
     duration_days: 60,
     risk_level: "low",
-    student_name: "Maya Chen",
-    university: "Stanford University",
-    status: "listed"
+    student_name: "Femi Adebayo",
+    university: "University of Lagos",
+    status: "listed",
   },
   {
     id: "2",
     entrepreneur_id: "e2",
     name: "TutorMatch Pro",
-    description: "AI-powered platform connecting students with peer tutors based on learning style and subject expertise.",
+    description:
+      "AI-powered platform connecting students with peer tutors based on learning style and subject expertise.",
     category: "EdTech",
-    funding_goal: 8000,
-    amount_raised: 4200,
+    funding_goal: 80000,
+    amount_raised: 42000,
     interest_rate: 15,
     duration_days: 90,
     risk_level: "medium",
-    student_name: "James Rodriguez",
-    university: "MIT",
-    status: "listed"
+    student_name: "Chinedu Okafor",
+    university: "Trinity University, Yaba",
+    status: "listed",
   },
   {
     id: "3",
     entrepreneur_id: "e3",
     name: "Campus Thrift",
-    description: "Mobile app for buying and selling second-hand textbooks and dorm essentials within university communities.",
+    description:
+      "Mobile app for buying and selling second-hand textbooks and dorm essentials within university communities.",
     category: "Marketplace",
-    funding_goal: 3000,
+    funding_goal: 100000,
     amount_raised: 2800,
     interest_rate: 10,
     duration_days: 45,
     risk_level: "low",
-    student_name: "Sarah Kim",
-    university: "UC Berkeley",
-    status: "listed"
-  }
+    student_name: "Abisola Adekunle",
+    university: "Obafemi Awolowo University",
+    status: "listed",
+  },
 ];
 
 const testimonials = [
   {
-    quote: "StudentBIZ helped me turn my dorm room idea into a real business. The funding process was simple and the investor community has been incredibly supportive.",
-    name: "Alex Thompson",
-    role: "Student Founder, CampusEats"
+    quote:
+      "StudentBIZ helped me turn my dorm room idea into a real business. The funding process was simple and the investor community has been incredibly supportive.",
+    name: "Femi Adebayo",
+    role: "Student Founder, CampusEats",
   },
   {
-    quote: "I love that my investments support student entrepreneurs while earning competitive returns. It's a win-win that creates real impact.",
-    name: "Dr. Patricia Moore",
-    role: "Impact Investor"
+    quote:
+      "I love that my investments support student entrepreneurs while earning competitive returns. It's a win-win that creates real impact.",
+    name: "Aisha Bello",
+    role: "Impact Investor",
   },
   {
-    quote: "The platform's transparency and risk assessment made me confident to invest. I've already seen returns on three student ventures.",
-    name: "Michael Chang",
-    role: "Angel Investor"
-  }
+    quote:
+      "The platform's transparency and risk assessment made me confident to invest. I've already seen returns on three student ventures.",
+    name: "Daniel Okonkwo",
+    role: "Angel Investor",
+  },
 ];
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       {/* Hero Section */}
       <section className="relative pt-24 lg:pt-32 pb-20 overflow-hidden">
         {/* Background */}
         <div className="absolute inset-0 gradient-hero opacity-5" />
-        <div 
+        <div
           className="absolute inset-0 opacity-10"
           style={{
             backgroundImage: `url(${heroImage})`,
@@ -104,7 +110,7 @@ const Index = () => {
             backgroundPosition: "center",
           }}
         />
-        
+
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             <motion.div
@@ -116,7 +122,7 @@ const Index = () => {
                 🚀 Peer-to-Peer Lending for the Next Generation
               </span>
             </motion.div>
-            
+
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -126,17 +132,18 @@ const Index = () => {
               Empowering Student Entrepreneurs.{" "}
               <span className="text-gradient">Rewarding Investors.</span>
             </motion.h1>
-            
+
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto"
             >
-              Connect with innovative student ventures, fund the next big idea, 
-              and earn competitive returns while making a real impact on education and entrepreneurship.
+              Connect with innovative student ventures, fund the next big idea,
+              and earn competitive returns while making a real impact on
+              education and entrepreneurship.
             </motion.p>
-            
+
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -144,14 +151,22 @@ const Index = () => {
               className="flex flex-col sm:flex-row gap-4 justify-center"
             >
               <Link to="/auth?type=student">
-                <Button variant="hero" size="xl" className="gap-2 w-full sm:w-auto">
+                <Button
+                  variant="hero"
+                  size="xl"
+                  className="gap-2 w-full sm:w-auto"
+                >
                   <GraduationCap className="w-5 h-5" />
                   Apply for Funding
                   <ArrowRight className="w-5 h-5" />
                 </Button>
               </Link>
               <Link to="/auth?type=investor">
-                <Button variant="heroOutline" size="xl" className="gap-2 w-full sm:w-auto">
+                <Button
+                  variant="heroOutline"
+                  size="xl"
+                  className="gap-2 w-full sm:w-auto"
+                >
                   <Users className="w-5 h-5" />
                   Start Investing
                 </Button>
@@ -165,10 +180,30 @@ const Index = () => {
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatCard icon={DollarSign} value="$2.4M+" label="Total Funded" delay={0} />
-            <StatCard icon={Users} value="1,200+" label="Active Investors" delay={0.1} />
-            <StatCard icon={GraduationCap} value="350+" label="Student Ventures" delay={0.2} />
-            <StatCard icon={PieChart} value="94%" label="Success Rate" delay={0.3} />
+            <StatCard
+              icon={DollarSign}
+              value="$2.4M+"
+              label="Total Funded"
+              delay={0}
+            />
+            <StatCard
+              icon={Users}
+              value="1,200+"
+              label="Active Investors"
+              delay={0.1}
+            />
+            <StatCard
+              icon={GraduationCap}
+              value="350+"
+              label="Student Ventures"
+              delay={0.2}
+            />
+            <StatCard
+              icon={PieChart}
+              value="94%"
+              label="Success Rate"
+              delay={0.3}
+            />
           </div>
         </div>
       </section>
@@ -187,7 +222,8 @@ const Index = () => {
               How StudentBIZ Works
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              A simple, transparent process that connects student entrepreneurs with impact-driven investors.
+              A simple, transparent process that connects student entrepreneurs
+              with impact-driven investors.
             </p>
           </motion.div>
 
@@ -211,7 +247,7 @@ const Index = () => {
                   "Submit your business idea and funding requirements",
                   "Complete verification and risk assessment",
                   "Get approved and receive funding from investors",
-                  "Grow your business and repay with interest"
+                  "Grow your business and repay with interest",
                 ].map((step, index) => (
                   <li key={index} className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-success mt-0.5 flex-shrink-0" />
@@ -245,7 +281,7 @@ const Index = () => {
                   "Create an account and complete KYC verification",
                   "Browse approved student businesses by category",
                   "Invest any amount and track your portfolio",
-                  "Earn fixed returns (up to 15%) on maturity"
+                  "Earn fixed returns (up to 15%) on maturity",
                 ].map((step, index) => (
                   <li key={index} className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-success mt-0.5 flex-shrink-0" />
@@ -277,13 +313,18 @@ const Index = () => {
               Featured Student Ventures
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Discover verified student businesses seeking funding. Each venture is carefully assessed for viability and risk.
+              Discover verified student businesses seeking funding. Each venture
+              is carefully assessed for viability and risk.
             </p>
           </motion.div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
             {featuredBusinesses.map((business, index) => (
-              <BusinessCard key={business.id} venture={business} delay={index * 0.1} />
+              <BusinessCard
+                key={business.id}
+                venture={business}
+                delay={index * 0.1}
+              />
             ))}
           </div>
 
@@ -320,18 +361,21 @@ const Index = () => {
               {
                 icon: Shield,
                 title: "Verified & Secure",
-                description: "All student ventures undergo thorough verification. Your investments are protected with industry-standard security."
+                description:
+                  "All student ventures undergo thorough verification. Your investments are protected with industry-standard security.",
               },
               {
                 icon: TrendingUp,
                 title: "Competitive Returns",
-                description: "Earn up to 15% fixed returns based on risk categories. Clear terms, predictable income."
+                description:
+                  "Earn up to 15% fixed returns based on risk categories. Clear terms, predictable income.",
               },
               {
                 icon: Clock,
                 title: "Flexible Terms",
-                description: "Choose from various loan durations (45-90 days) and investment amounts that fit your strategy."
-              }
+                description:
+                  "Choose from various loan durations (45-90 days) and investment amounts that fit your strategy.",
+              },
             ].map((feature, index) => (
               <motion.div
                 key={index}
@@ -368,7 +412,8 @@ const Index = () => {
               Success Stories
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Hear from students and investors who've experienced the StudentBIZ difference.
+              Hear from students and investors who've experienced the StudentBIZ
+              difference.
             </p>
           </motion.div>
 
@@ -402,7 +447,8 @@ const Index = () => {
                 Ready to Get Started?
               </h2>
               <p className="text-primary-foreground/80 max-w-xl mx-auto mb-8">
-                Join thousands of students and investors building the future of entrepreneurship together.
+                Join thousands of students and investors building the future of
+                entrepreneurship together.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link to="/auth?type=student">
